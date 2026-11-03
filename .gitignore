@@ -1,0 +1,16 @@
+# This repository tracks the interactive report; other workspace artifacts stay local.
+/*
+!/.gitignore
+!/.gitattributes
+!/README.md
+!/VERSION
+!/CHANGELOG.md
+!/tools/
+!/outputs/
+/outputs/*
+!/outputs/sgrt-interactive-report/
+**/__pycache__/
+**/*.pyc
+**/~$*
+.DS_Store
+Thumbs.db
