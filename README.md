@@ -4,6 +4,8 @@
 
 当前版本：**0.2.0**。
 
+在线阅读：**[AlignRT 与 SGRT 交互式专题报告](https://happyhq.github.io/alignrt-sgrt-report/)**。
+
 - [报告首页](outputs/sgrt-interactive-report/index.html)
 - [使用、部署与打印说明](outputs/sgrt-interactive-report/README.md)
 - [Markdown 原稿](outputs/sgrt-interactive-report/report.md)
@@ -43,4 +45,8 @@ python tools/check_report.py
 
 GitHub Actions 在 push 和 pull request 时运行相同检查，验证本地资源、页内锚点、SVG 与来源记录。配置见 `.github/workflows/check-report.yml`。浏览器视觉验收范围见报告验收记录，完整性检查不替代视觉复核。
 
-仓库用于版本管理，当前未启用 GitHub Pages。
+## 在线发布
+
+仓库公开维护，通过 GitHub Pages 提供无需登录的阅读地址：<https://happyhq.github.io/alignrt-sgrt-report/>。
+
+`.github/workflows/deploy-pages.yml` 在 `main` 更新或手动运行时，先检查报告完整性，再将 `outputs/sgrt-interactive-report/` 发布到 GitHub Pages。无需构建命令。通过 PR 合入 `main` 后，可在仓库 Actions 中查看部署进度；部署成功后刷新阅读网址即可获取更新。其他本地工作文件不属于发布目录。
