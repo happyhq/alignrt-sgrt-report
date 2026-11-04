@@ -6,6 +6,7 @@
 !/VERSION
 !/CHANGELOG.md
 !/tools/
+!/.github/
 !/outputs/
 /outputs/*
 !/outputs/sgrt-interactive-report/

@@ -40,6 +40,6 @@ python -m http.server 8765 --bind 127.0.0.1 --directory outputs/sgrt-interactive
 python tools/check_report.py
 ```
 
-该脚本验证本地资源、页内锚点、SVG 与来源记录。浏览器视觉验收范围见报告验收记录，完整性检查不替代视觉复核。当前 GitHub 凭据未包含 `workflow` 权限，首版未启用 GitHub Actions。
+GitHub Actions 在 push 和 pull request 时运行相同检查，验证本地资源、页内锚点、SVG 与来源记录。配置见 `.github/workflows/check-report.yml`。浏览器视觉验收范围见报告验收记录，完整性检查不替代视觉复核。
 
 仓库用于版本管理，当前未启用 GitHub Pages。
