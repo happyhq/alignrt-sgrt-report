@@ -24,13 +24,14 @@
   nav.addEventListener('click', event => { if (event.target.closest('a')) closeMenu(); });
   document.addEventListener('click', event => { if (!nav.contains(event.target) && !menu.contains(event.target)) closeMenu(); });
   document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMenu(); });
-  window.addEventListener('resize', () => { if (innerWidth > 760) closeMenu(); });
+  window.addEventListener('resize', () => { if (innerWidth >= 1440) closeMenu(); });
 
   const chapters = $$('.chapter');
   const progress = $('.reading-progress');
   let scrollPending = false;
   function updateReading() {
-    const max = document.documentElement.scrollHeight - innerHeight;
+    const lastChapter = chapters[chapters.length - 1];
+    const max = lastChapter.getBoundingClientRect().bottom + scrollY - innerHeight;
     const percent = max > 0 ? Math.min(100, Math.max(0, Math.round(scrollY / max * 100))) : 100;
     progress.firstElementChild.style.width = `${percent}%`;
     progress.setAttribute('aria-valuenow', String(percent));

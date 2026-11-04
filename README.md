@@ -2,7 +2,7 @@
 
 基于 29 页入门 PPT 制作的中文 HTML5 专题报告，包含七章正文、八幅 SVG 插图、九组交互结构图，以及原文、备注与引用记录。
 
-当前版本：**0.1.0**。
+当前版本：**0.2.0**。
 
 - [报告首页](outputs/sgrt-interactive-report/index.html)
 - [使用、部署与打印说明](outputs/sgrt-interactive-report/README.md)
@@ -11,6 +11,7 @@
 - [验收记录](outputs/sgrt-interactive-report/验收检查.md)
 - [A4 PDF](outputs/sgrt-interactive-report/AlignRT与SGRT专题报告_A4.pdf)
 - [版本变更](CHANGELOG.md)
+- [与参考站的设计分析和本次改进](outputs/sgrt-interactive-report/设计分析与改进.md)
 
 ## 本地阅读
 
