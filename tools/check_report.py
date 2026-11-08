@@ -24,9 +24,9 @@ class Page(HTMLParser):
             if key in attrs:
                 self.links.append(attrs[key])
 
-def main():
+def check_page(path):
     page = Page()
-    page.feed((REPORT / 'index.html').read_text(encoding='utf-8'))
+    page.feed(path.read_text(encoding='utf-8'))
     assert page.h1 == 1, 'Expected one report title'
     assert len(page.ids) == len(set(page.ids)), 'Duplicate HTML IDs'
     for link in page.links:
@@ -34,11 +34,16 @@ def main():
         if url.scheme or url.netloc:
             continue
         if url.path:
-            asset = (REPORT / unquote(url.path)).resolve()
+            asset = (path.parent / unquote(url.path)).resolve()
             assert asset.is_relative_to(REPORT.resolve()), f'Resource escapes report: {link}'
             assert asset.is_file(), f'Missing resource: {link}'
         elif url.fragment:
             assert unquote(url.fragment) in page.ids, f'Missing anchor: {link}'
+    return page
+
+def main():
+    page = check_page(REPORT / 'index.html')
+    technical = check_page(REPORT / 'technical' / 'index.html')
     source = json.loads((REPORT / 'source.json').read_text(encoding='utf-8'))
     assert [s['page'] for s in source['slides']] == list(range(1, 30))
     manuscript = (REPORT / 'report.md').read_text(encoding='utf-8')
@@ -54,7 +59,7 @@ def main():
     pdf = REPORT / 'AlignRT与SGRT专题报告_A4.pdf'
     assert pdf.read_bytes().startswith(b'%PDF-'), 'Invalid PDF header'
     version = (ROOT / 'VERSION').read_text(encoding='utf-8').strip()
-    print(f'PASS v{version}: local assets, anchors, 29 source pages, SVG and PDF integrity')
+    print(f'PASS v{version}: two reports, {len(technical.ids)} technical anchors, local assets, 29 source pages, SVG and PDF integrity')
 
 if __name__ == '__main__':
     main()

@@ -2,9 +2,11 @@
 
 基于 29 页入门 PPT 制作的中文 HTML5 专题报告，包含七章正文、八幅 SVG 插图、九组交互结构图，以及原文、备注与引用记录。
 
-当前版本：**0.2.0**。
+当前版本：**0.3.0**。
 
 在线阅读：**[AlignRT 与 SGRT 交互式专题报告](https://happyhq.github.io/alignrt-sgrt-report/)**。
+
+第二期：**[AlignRT 如何把体表变成三维？](https://happyhq.github.io/alignrt-sgrt-report/technical/)**。包含 15 组交互实验与 24 条来源记录，可直接拖动、播放和调整参数。教学模型与参数不代表设备规格或临床验证结果。
 
 - [报告首页](outputs/sgrt-interactive-report/index.html)
 - [使用、部署与打印说明](outputs/sgrt-interactive-report/README.md)
