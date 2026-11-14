@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f3f7fb">
+  <meta name="description" content="SGRT 技术报告第五章：从测量到反馈与门控，理解呼吸反馈、判定、接口和端到端时延。">
+  <title>05 从测量到反馈与门控 · SGRT 技术报告 v2</title>
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/report.css">
+</head>
+<body class="report-shell" data-page="feedback">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <a class="brand" href="../../index.html" aria-label="返回 SGRT 知识系列首页"><span class="brand-mark" aria-hidden="true">S</span><span>光学体表引导<span class="brand-caption">SGRT KNOWLEDGE SERIES / TECHNICAL V2</span></span></a>
+    <nav class="header-nav" aria-label="专题切换"><a href="../../index.html">01 综合入门</a><a href="../index.html">02 技术总览</a><a href="../../technical/index.html">旧版技术页</a></nav>
+    <div class="header-meta"><span class="preview-pill">CHAPTER 05 / 06</span><span>V2 PREVIEW</span></div>
+  </header>
+
+  <main id="main" class="site-main">
+    <div class="breadcrumb"><a href="../index.html">技术总览</a><span>/</span><span>05 从测量到反馈与门控</span></div>
+    <nav class="chapter-rail" aria-label="六章导航">
+      <a href="../index.html">总览</a><a href="../surface/index.html">01 体表测量</a><a href="../coordinates/index.html">02 统一坐标</a><a href="../pose/index.html">03 参考与位姿</a><a href="../validity/index.html">04 可信度</a><a href="index.html" aria-current="page">05 反馈与门控</a><a href="../evidence/index.html">06 证据边界</a>
+    </nav>
+
+    <section class="chapter-hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">05 / MEASURE → CONTROL</p>
+        <h1 id="page-title"><span class="chapter-number">05</span>从测量到<br>反馈与门控</h1>
+        <p class="chapter-question">体表偏差怎样经过判定、接口和延迟，变成患者看得见的反馈或允许出束的信号？为什么“屏幕上变了颜色”不等于“束流已经停止”？</p>
+      </div>
+      <aside class="chapter-conclusion"><strong>本章工程结论</strong>反馈颜色、运动许可和束流停止不是同一个事件；完整响应链必须端到端测量。</aside>
+    </section>
+
+    <div class="chapter-content">
+      <section class="chapter-intro" aria-labelledby="intro-title">
+        <div>
+          <h2 id="intro-title">把“反馈”拆成一条链</h2>
+          <p>测量值先经过目标带和有效性判断，再变成患者反馈或门控请求；请求还要经过接口传输、治疗机响应和实际停束。每一段都可能引入时延，也可能因为状态不清楚而需要降级或暂停。</p>
+          <p>帧率描述相机多久采一帧，端到端时延描述从表面变化到最终动作的完整时间。两者不能互相替代；设备接口是否已获授权、是否失效安全，也必须在真实系统上验证。</p>
+        </div>
+        <p class="intro-note"><b>不要合并三个词</b>显示反馈 · 运动许可 · 停束完成。它们是三个不同层级的事件。</p>
+      </section>
+
+      <figure class="main-figure">
+        <div class="figure-head"><span>MAIN FIGURE 05</span><span>MEASURE → JUDGE → SIGNAL → INTERFACE → STOP</span></div>
+        <svg viewBox="0 0 940 270" role="img" aria-labelledby="feedback-figure-title feedback-figure-desc">
+          <title id="feedback-figure-title">从体表测量到停束的完整链路</title>
+          <desc id="feedback-figure-desc">测量值经过有效性和目标带判断后形成反馈或门控请求，再通过接口和治疗机响应完成停束；每一段都有独立时延和验证责任。</desc>
+          <g font-size="11">
+            <path d="M40 105H900" stroke="#d3e2ef" stroke-width="2"/>
+            <g>
+              <circle cx="95" cy="105" r="11" fill="#e8f2fa" stroke="#125bc5" stroke-width="2"/><text x="95" y="154" text-anchor="middle" fill="#536b83">测量</text><text x="95" y="75" text-anchor="middle" fill="#125bc5">surface</text>
+              <circle cx="270" cy="105" r="11" fill="#e8f2fa" stroke="#076b83" stroke-width="2"/><text x="270" y="154" text-anchor="middle" fill="#536b83">判定</text><text x="270" y="75" text-anchor="middle" fill="#076b83">state</text>
+              <circle cx="445" cy="105" r="11" fill="#fff0e4" stroke="#a94f12" stroke-width="2"/><text x="445" y="154" text-anchor="middle" fill="#536b83">反馈 / 请求</text><text x="445" y="75" text-anchor="middle" fill="#a94f12">signal</text>
+              <circle cx="620" cy="105" r="11" fill="#e8f2fa" stroke="#125bc5" stroke-width="2"/><text x="620" y="154" text-anchor="middle" fill="#536b83">接口</text><text x="620" y="75" text-anchor="middle" fill="#125bc5">transfer</text>
+              <circle cx="800" cy="105" r="11" fill="#e3f4ed" stroke="#19795f" stroke-width="2"/><text x="800" y="154" text-anchor="middle" fill="#536b83">停束完成</text><text x="800" y="75" text-anchor="middle" fill="#19795f">stop</text>
+            </g>
+            <path d="M112 125C150 175 188 180 240 136M286 136C321 178 365 178 418 136M460 128C510 164 552 164 598 132M636 126C683 160 729 160 775 132" fill="none" stroke="#a94f12" stroke-width="1.5" stroke-dasharray="4 4"/>
+            <text x="470" y="218" text-anchor="middle" fill="#a94f12">端到端时延 = 采样 + 处理 + 传输 + 响应（还可能有显示刷新和确认）</text>
+            <text x="470" y="242" text-anchor="middle" fill="#536b83">任何一段都不能用“帧率高”替代；模拟接口不等于真实出束控制。</text>
+          </g>
+        </svg>
+        <figcaption>患者反馈、运动许可和停束完成是三层不同事件。真实系统的接口、权限、失效安全和响应时间需要联合验证。</figcaption>
+      </figure>
+
+      <section class="lab" id="experiment-coach" aria-labelledby="coach-title">
+        <div class="lab-head"><div><p class="lab-kicker">MAIN EXPERIMENT / 5.1</p><h3 id="coach-title">呼吸反馈：患者看到的颜色代表什么？</h3><p>拖动合成高度，观察目标带与当前状态；目标是理解反馈层级，不是学习临床阈值。</p></div><span class="lab-tag">合成目标带 · 非临床规则</span></div>
+        <div class="lab-body">
+          <div class="lab-stage">
+            <svg viewBox="0 0 620 330" role="img" aria-labelledby="coach-scene-title coach-scene-desc">
+              <title id="coach-scene-title">呼吸反馈的目标带与当前位置</title>
+              <desc id="coach-scene-desc">合成体表高度条显示目标带和当前位置；目标带内只是显示状态，不证明内部靶区位于计划位置。</desc>
+              <rect x="20" y="20" width="580" height="270" rx="10" fill="#0d1b29" stroke="#395a73"/>
+              <text x="310" y="61" text-anchor="middle" fill="#b7ccdc" font-size="11">患者视野中的呼吸反馈 · 教学模拟</text>
+              <rect x="170" y="88" width="280" height="132" rx="10" fill="#142b40" stroke="#395a73"/>
+              <rect x="181" y="99" width="258" height="110" rx="6" fill="#0d1b29"/>
+              <g id="coach-current" data-state="ok">
+                <path d="M310 190V122" stroke="#86d6f5" stroke-width="5" stroke-linecap="round"/>
+                <circle cx="310" cy="190" r="8" fill="#9cdec4"/>
+              </g>
+              <path d="M236 120H384M236 160H384" stroke="#395a73" stroke-dasharray="4 4"/>
+              <rect x="236" y="132" width="148" height="18" rx="9" fill="#ffb271" fill-opacity=".18" stroke="#ffb271" stroke-dasharray="4 4"/>
+              <text x="310" y="158" text-anchor="middle" fill="#ffb271" font-size="10">目标带（教学）</text>
+              <text x="310" y="246" text-anchor="middle" fill="#86d6f5" font-size="11">当前体表高度</text>
+              <text x="310" y="275" text-anchor="middle" fill="#b7ccdc" font-size="10">颜色是流程反馈，不是内部靶区读数</text>
+            </svg>
+          </div>
+          <div class="lab-controls">
+            <div class="control-row"><div class="control-title"><label for="coach-height">合成体表高度</label><output id="coach-height-value">65%</output></div><input id="coach-height" type="range" min="0" max="100" step="1" value="65"><div class="range-scale"><span>低</span><span>目标带</span><span>高</span></div></div>
+            <div class="lab-readout"><b>反 馈 状 态</b><strong id="coach-state">位于目标带</strong><span>合成目标带：55%–75%</span></div>
+            <div class="state-box" id="coach-readout" data-state="ok" role="status" aria-live="polite">目标带内是显示状态，不证明内部靶区位于计划位置。</div>
+            <p class="control-note">真实系统可能使用颜色、声光、图形或接口信号；本页不复制任何厂商的显示规则。</p>
+          </div>
+        </div>
+      </section>
+
+      <details class="experiment-details" id="experiment-latency">
+        <summary><span>实验 5.2 · 旧 11</span> 门控时延：已经越界，为什么束流还没有停？ <span>latency</span></summary>
+        <div class="details-body">
+          <p>把完整链路拆成采样等待、处理、接口传输和停束响应四段。改变任一段，观察总时延和按教学速度计算的运动距离；这里没有真实治疗机接口。</p>
+          <div class="lab-grid-2" style="margin-top:14px">
+            <div><div class="control-title"><label for="latency-capture">等待新帧</label><output id="latency-capture-value">30 ms</output></div><input id="latency-capture" type="range" min="0" max="200" step="5" value="30"><div class="range-scale"><span>0</span><span>200 ms</span></div></div>
+            <div><div class="control-title"><label for="latency-process">重建 / 判定</label><output id="latency-process-value">80 ms</output></div><input id="latency-process" type="range" min="0" max="200" step="5" value="80"><div class="range-scale"><span>0</span><span>200 ms</span></div></div>
+            <div><div class="control-title"><label for="latency-interface">接口传输</label><output id="latency-interface-value">25 ms</output></div><input id="latency-interface" type="range" min="0" max="200" step="5" value="25"><div class="range-scale"><span>0</span><span>200 ms</span></div></div>
+            <div><div class="control-title"><label for="latency-stop">停束响应</label><output id="latency-stop-value">40 ms</output></div><input id="latency-stop" type="range" min="0" max="200" step="5" value="40"><div class="range-scale"><span>0</span><span>200 ms</span></div></div>
+          </div>
+          <div class="control-row"><div class="control-title"><label for="latency-speed">教学运动速度</label><output id="latency-speed-value">10 mm/s</output></div><input id="latency-speed" type="range" min="1" max="30" step="1" value="10"><div class="range-scale"><span>1 mm/s</span><span>30 mm/s</span></div></div>
+          <div class="lab-readout"><b>端 到 端 教 学 值</b><strong id="latency-total">175 ms</strong><span id="latency-distance">1.75 mm · 10 mm/s × 175 ms</span></div>
+          <div class="state-box" id="latency-state" role="status" aria-live="polite">从表面变化到停束请求共 175 ms；教学值，真实响应链需端到端测量。</div>
+          <p class="control-note">帧率、处理耗时、接口和设备响应不是同一个指标；“停束请求”也不等于“束流已经停止”。</p>
+        </div>
+      </details>
+
+      <section class="chapter-takeaways" aria-label="本章结论">
+        <div class="takeaway-card fact"><h3>Fact · 接口与时延</h3><p>公开指南关注 motion management 与 QA；研究文献提示帧率、日志时间和真实响应链不能混为一谈。</p></div>
+        <div class="takeaway-card inference"><h3>Inference · 系统设计</h3><p>端到端时延要按链路测量；任何模拟接口都不能被读成真实出束授权。</p></div>
+        <div class="takeaway-card assumption"><h3>Assumption · 反馈规则</h3><p>本页目标带、颜色和教学速度均为合成参数，不代表任何厂商或临床协议。</p></div>
+      </section>
+
+      <section class="chapter-boundary" aria-labelledby="boundary-title">
+        <div><h2 id="boundary-title">本章能回答什么？</h2><p>能解释测量、判定、反馈、接口和停束的分层关系；能说明帧率为什么不能替代端到端时延。不能从本页推出真实设备控制、停束安全或临床工作流已经获批。</p><div class="inline-tags"><span class="tag tag--fact">V5</span><span class="tag tag--fact">E3</span><span class="tag tag--fact">E4</span></div></div>
+        <div class="boundary-list"><div><b>不能回答</b><span>真实治疗机是否接受信号</span></div><div><b>不能回答</b><span>某个目标带适不适合患者</span></div><div><b>需要下一章</b><span>体表与内部证据边界</span></div></div>
+      </section>
+    </div>
+
+    <nav class="page-nav-bottom" aria-label="章节翻页">
+      <a href="../validity/index.html" rel="prev"><small>上一章 / 04</small><strong>← 从配准到跟踪可信</strong></a>
+      <a class="home-link" href="../index.html">回系统地图</a>
+      <a href="../evidence/index.html" rel="next"><small>下一章 / 06</small><strong>从服务应用到证据边界 →</strong></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer"><div class="footer-row"><span>SGRT 技术报告 v2 · 05 从测量到反馈与门控</span><div class="footer-links"><a href="../index.html">系统总览</a><a href="../../technical/index.html">旧版技术页</a><a href="#main">回到顶部 ↑</a></div></div><p class="footer-fine">反馈与延迟教学模拟 · 无真实设备接口 · 不代表临床阈值、治疗控制或安全结论。</p></footer>
+  <script src="../assets/report-data.js"></script><script src="../assets/report.js" defer></script>
+</body>
+</html>

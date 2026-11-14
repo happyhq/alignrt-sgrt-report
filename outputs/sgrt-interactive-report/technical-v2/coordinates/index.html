@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f3f7fb">
+  <meta name="description" content="SGRT 技术报告第二章：从多视角到统一坐标，理解相机标定、POD 变换、重投影误差和治疗室基准。">
+  <title>02 从多视角到统一坐标 · SGRT 技术报告 v2</title>
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/report.css">
+</head>
+<body class="report-shell" data-page="coordinates">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <a class="brand" href="../../index.html" aria-label="返回 SGRT 知识系列首页"><span class="brand-mark" aria-hidden="true">S</span><span>光学体表引导<span class="brand-caption">SGRT KNOWLEDGE SERIES / TECHNICAL V2</span></span></a>
+    <nav class="header-nav" aria-label="专题切换"><a href="../../index.html">01 综合入门</a><a href="../index.html">02 技术总览</a><a href="../../technical/index.html">旧版技术页</a></nav>
+    <div class="header-meta"><span class="preview-pill">CHAPTER 02 / 06</span><span>V2 PREVIEW</span></div>
+  </header>
+
+  <main id="main" class="site-main">
+    <div class="breadcrumb"><a href="../index.html">技术总览</a><span>/</span><span>02 从多视角到统一坐标</span></div>
+    <nav class="chapter-rail" aria-label="六章导航">
+      <a href="../index.html">总览</a><a href="../surface/index.html">01 体表测量</a><a href="index.html" aria-current="page">02 统一坐标</a><a href="../pose/index.html">03 参考与位姿</a><a href="../validity/index.html">04 可信度</a><a href="../feedback/index.html">05 反馈与门控</a><a href="../evidence/index.html">06 证据边界</a>
+    </nav>
+
+    <section class="chapter-hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">02 / MULTI-VIEW → FRAME</p>
+        <h1 id="page-title"><span class="chapter-number">02</span>从多视角到<br>统一坐标</h1>
+        <p class="chapter-question">不同相机、不同视角的点，怎样进入同一个可追溯的坐标基准？这里至少有三种“统一”：像素模型、相机之间、光学坐标与治疗室坐标。</p>
+      </div>
+      <aside class="chapter-conclusion"><strong>本章工程结论</strong>相机彼此一致，不等于与辐射等中心一致；标定和融合解决的是两类不同的基准问题。</aside>
+    </section>
+
+    <div class="chapter-content">
+      <section class="chapter-intro" aria-labelledby="intro-title">
+        <div>
+          <h2 id="intro-title">先把“坐标在哪里”问清楚</h2>
+          <p>像素坐标描述图像中的位置；相机坐标描述相对某台相机的三维位置；POD 坐标把同一组相机的左右视图放在一起；治疗室坐标还要与等中心、床和成像基准建立关系。每一层都需要自己的验证证据。</p>
+          <p>重投影误差小，只能说明已知目标点在图像中的拟合较好。它不能自动证明标定板在空间中的尺度、相机安装的长期稳定，或光学坐标与辐射等中心已经对齐。</p>
+        </div>
+        <p class="intro-note"><b>必须区分</b>内参（相机内部几何）· 外参（相机相对位姿）· 坐标变换（POD 到共同坐标）· 基准验证（与治疗室/等中心的关系）。</p>
+      </section>
+
+      <figure class="main-figure">
+        <div class="figure-head"><span>MAIN FIGURE 02</span><span>PIXEL → CAMERA → POD → ROOM</span></div>
+        <svg viewBox="0 0 940 280" role="img" aria-labelledby="coordinates-figure-title coordinates-figure-desc">
+          <title id="coordinates-figure-title">从像素坐标到治疗室坐标</title>
+          <desc id="coordinates-figure-desc">图像像素先经过相机模型得到相机坐标，再通过 POD 变换进入共同坐标，最后通过独立基准与治疗室坐标对齐。</desc>
+          <defs><marker id="coord-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#076b83"/></marker></defs>
+          <g font-size="11" fill="#536b83">
+            <rect x="20" y="45" width="170" height="170" rx="12" fill="#fff" stroke="#d3e2ef"/>
+            <text x="42" y="75" fill="#076b83" font-family="Consolas, monospace">PIXEL</text>
+            <path d="M48 95h110M48 117h86M48 139h96M48 161h76" stroke="#b5cfe1" stroke-width="3"/>
+            <text x="105" y="192" text-anchor="middle">像素坐标 (u,v)</text>
+            <path d="M198 130H238" stroke="#087f9d" stroke-width="2" marker-end="url(#coord-arrow)"/>
+            <rect x="252" y="45" width="170" height="170" rx="12" fill="#e8f2fa" stroke="#d3e2ef"/>
+            <text x="274" y="75" fill="#076b83" font-family="Consolas, monospace">CAMERA</text>
+            <circle cx="337" cy="126" r="20" fill="#fff" stroke="#125bc5" stroke-width="2"/>
+            <path d="M337 146v47M310 134l-28 40M364 134l28 40" stroke="#125bc5" stroke-width="2"/>
+            <text x="337" y="192" text-anchor="middle">相机坐标</text>
+            <path d="M430 130H470" stroke="#087f9d" stroke-width="2" marker-end="url(#coord-arrow)"/>
+            <rect x="484" y="45" width="170" height="170" rx="12" fill="#fff" stroke="#d3e2ef"/>
+            <text x="506" y="75" fill="#076b83" font-family="Consolas, monospace">POD / FUSED</text>
+            <path d="M512 170l28-38 31 17 37-48 37 29 22-25" fill="none" stroke="#125bc5" stroke-width="2"/>
+            <circle cx="540" cy="132" r="4" fill="#a94f12"/><circle cx="571" cy="149" r="4" fill="#a94f12"/><circle cx="608" cy="101" r="4" fill="#a94f12"/>
+            <text x="569" y="192" text-anchor="middle">共同坐标</text>
+            <path d="M662 130H702" stroke="#087f9d" stroke-width="2" marker-end="url(#coord-arrow)"/>
+            <rect x="716" y="45" width="204" height="170" rx="12" fill="#e8f2fa" stroke="#d3e2ef"/>
+            <text x="738" y="75" fill="#076b83" font-family="Consolas, monospace">ROOM / ISOCENTER</text>
+            <path d="M776 150l24-34 25 15 31-40 33 22" fill="none" stroke="#125bc5" stroke-width="2"/>
+            <path d="M818 88v77M779 126h77" stroke="#a94f12" stroke-dasharray="4 4"/>
+            <circle cx="818" cy="126" r="8" fill="none" stroke="#a94f12" stroke-width="2"/>
+            <text x="818" y="192" text-anchor="middle">治疗室 / 等中心基准</text>
+            <text x="470" y="245" text-anchor="middle" fill="#a94f12">重投影误差 ≠ 绝对空间精度 ≠ 与辐射等中心对齐</text>
+          </g>
+        </svg>
+        <figcaption>图中把“统一坐标”拆成四层。每增加一层，就会引入新的尺度、变换和验证问题；不能用一个像素指标替代全部证据。</figcaption>
+      </figure>
+
+      <section class="lab" id="experiment-calibration" aria-labelledby="calibration-title">
+        <div class="lab-head"><div><p class="lab-kicker">MAIN EXPERIMENT / 2.1</p><h3 id="calibration-title">标定：像素误差怎样进入空间误差？</h3><p>改变一个教学参数，观察像素域残差与空间误差的不同量级。</p></div><span class="lab-tag">合成参数 · 非设备标定</span></div>
+        <div class="lab-body">
+          <div class="lab-stage">
+            <svg viewBox="0 0 620 330" role="img" aria-labelledby="calibration-scene-title calibration-scene-desc">
+              <title id="calibration-scene-title">标定目标与相机几何的教学示意</title>
+              <desc id="calibration-scene-desc">一个已知标记板位于相机前方，标记点从三维空间投影到图像平面；像素残差和空间尺度不是同一个量。</desc>
+              <rect x="20" y="20" width="580" height="290" rx="10" fill="#0d1b29" stroke="#395a73"/>
+              <path d="M82 235L235 120L378 235Z" fill="#142b40" stroke="#86d6f5" stroke-width="1.4"/>
+              <path d="M160 210h130M180 196h90M145 224h165" stroke="#ffb271" stroke-width="3"/>
+              <circle cx="225" cy="205" r="5" fill="#ffb271"/><circle cx="290" cy="196" r="5" fill="#ffb271"/>
+              <path d="M225 205L78 90M290 196L78 90M225 205L378 90" stroke="#86d6f5" stroke-width="1" stroke-dasharray="4 4"/>
+              <rect x="53" y="69" width="50" height="42" rx="4" fill="#10283b" stroke="#86d6f5"/>
+              <text x="78" y="94" text-anchor="middle" fill="#86d6f5" font-size="10">相机</text>
+              <text x="225" y="265" fill="#b7ccdc" font-size="11" text-anchor="middle">已知标记点 → 投影到图像平面</text>
+              <text x="470" y="88" fill="#ffb271" font-size="11">外参：相机相对位姿</text>
+              <text x="470" y="110" fill="#ffb271" font-size="11">内参：焦距 / 主点 / 畸变</text>
+              <text x="470" y="132" fill="#86d6f5" font-size="11">像素残差：拟合指标</text>
+              <text x="470" y="154" fill="#9cdec4" font-size="11">空间基准：另外验证</text>
+            </svg>
+          </div>
+          <div class="lab-controls">
+            <div class="control-row"><div class="control-title"><label for="calibration-error">焦距估计扰动</label><output id="calibration-error-value">+3.0</output></div><input id="calibration-error" type="range" min="-5" max="5" step="0.1" value="3"><div class="range-scale"><span>−5</span><span>0</span><span>+5</span></div></div>
+            <div class="lab-readout"><b>像 素 / 空 间</b><strong id="calibration-residual">1.3 px</strong><span id="calibration-depth-error">≈ 5.1 mm · 教学放大值</span></div>
+            <div class="state-box" id="calibration-state" role="status" aria-live="polite">参数扰动示例：像素域残差变大，空间误差还会受到距离与几何放大的影响。</div>
+            <p class="control-note">真实标定需要已知尺度目标、独立空间基准和多次姿态；像素残差小不代表绝对定位正确。</p>
+          </div>
+        </div>
+      </section>
+
+      <details class="experiment-details" id="experiment-fusion">
+        <summary><span>实验 2.2 · 旧 05</span> 多视角融合：更多观测补回了哪片表面？ <span>fusion</span></summary>
+        <div class="details-body">
+          <p>多组 POD 的价值首先是补充可见方向、缓解遮挡，而不是自动把精度乘三。下面用合成采样计数说明覆盖变化；重复观测不会重复计入可见点。</p>
+          <div class="control-row"><div class="control-title"><span>启用 POD</span><span>点击切换</span></div><div class="lab-grid-2" style="margin-top:8px" role="group" aria-label="启用POD"><button class="lab-button" type="button" data-pod="1" aria-pressed="true">POD 1</button><button class="lab-button" type="button" data-pod="2" aria-pressed="true">POD 2</button><button class="lab-button" type="button" data-pod="3" aria-pressed="true">POD 3</button></div></div>
+          <div class="lab-readout"><b>合 成 上 表 面 覆 盖</b><strong id="fusion-coverage">925 / 925</strong><div class="lab-meter"><span id="fusion-meter" style="width:100%"></span></div></div>
+          <p id="fusion-state" role="status" aria-live="polite">合成上表面可见采样 100.0%；更多视角用于补覆盖，不自动等于更高精度。</p>
+          <p class="control-note">本实验只采样面向相机的上半表面，床板遮住的背面不会被补成完整人体；多视角也不等于多源独立真值。</p>
+        </div>
+      </details>
+
+      <section class="chapter-takeaways" aria-label="本章结论">
+        <div class="takeaway-card fact"><h3>Fact · 标定与几何</h3><p>针孔模型、畸变、立体校正和重投影都有公开的技术定义；标定目标可以提供已知几何线索。</p></div>
+        <div class="takeaway-card inference"><h3>Inference · 空间误差</h3><p>像素误差会随距离、基线和视角放大；融合前需要知道每个 POD 的变换和基准来自哪里。</p></div>
+        <div class="takeaway-card assumption"><h3>Assumption · 本章示例</h3><p>滑块的线性放大关系只是教学近似；真实误差要由独立空间基准和完整几何模型验证。</p></div>
+      </section>
+
+      <section class="chapter-boundary" aria-labelledby="boundary-title">
+        <div><h2 id="boundary-title">本章能回答什么？</h2><p>能解释内参、外参、POD 变换和房间坐标的不同职责；能说明重投影残差为什么不能替代绝对空间精度。不能从本页推出某台设备的基線、安装方式或等中心偏差。</p><div class="inline-tags"><span class="tag tag--fact">D1</span><span class="tag tag--fact">V3</span><span class="tag tag--fact">G1</span></div></div>
+        <div class="boundary-list"><div><b>不能回答</b><span>光学坐标已与辐射等中心对齐</span></div><div><b>不能回答</b><span>多 POD 融合精度线性增加</span></div><div><b>需要下一章</b><span>参考体表、ROI 和位姿</span></div></div>
+      </section>
+    </div>
+
+    <nav class="page-nav-bottom" aria-label="章节翻页">
+      <a href="../surface/index.html" rel="prev"><small>上一章 / 01</small><strong>← 从体表到三维测量</strong></a>
+      <a class="home-link" href="../index.html">回系统地图</a>
+      <a href="../pose/index.html" rel="next"><small>下一章 / 03</small><strong>从参考到六自由度位姿 →</strong></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer"><div class="footer-row"><span>SGRT 技术报告 v2 · 02 从多视角到统一坐标</span><div class="footer-links"><a href="../index.html">系统总览</a><a href="../../technical/index.html">旧版技术页</a><a href="#main">回到顶部 ↑</a></div></div><p class="footer-fine">标定与融合的教学示意 · 不代表设备安装、绝对精度或临床验收。</p></footer>
+  <script src="../assets/report-data.js"></script><script src="../assets/report.js" defer></script>
+</body>
+</html>

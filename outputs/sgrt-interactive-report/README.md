@@ -25,6 +25,15 @@ source.json                        逐页机器可读记录及原 PPT SHA-256
 AlignRT与SGRT专题报告_A4.pdf         已导出的 A4 阅读样张
 ```
 
+## 技术报告 v2
+
+`technical-v2/` 是技术专题的重构预览：`index.html` 作为系统总览枢纽，六个子目录分别承载“体表→三维、统一坐标、参考→6DoF、跟踪可信、反馈与门控、证据边界”。共享数据在 `assets/report-data.js`，样式和交互在 `assets/report.css`、`assets/report.js`。
+
+- 预览地址：<https://happyhq.github.io/alignrt-sgrt-report/technical-v2/>
+- 旧版技术页：<https://happyhq.github.io/alignrt-sgrt-report/technical/>
+- 本次预览不改变 `VERSION` 与旧版技术页的已发布基线；通过验收后再决定是否升级正式入口。
+- v2 的实验数值是合成教学示例，Fact / Inference / Assumption 的分层不构成产品规格、临床结论或 R0 验证证据。
+
 ## 内容与设计
 
 底稿为本工作区《AlignRT与SGRT零基础入门_学习版.pptx》，共 29 页。另两份入门 PPT 同为 29 页，采用学习版作为统一来源。参考网页仅用于研究米白纸面、中文衬线标题、细线分隔、边栏目录与杂志式双栏的阅读语言，未使用其正文或插图。

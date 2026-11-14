@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f3f7fb">
+  <meta name="description" content="SGRT 技术报告第六章：从服务应用到证据边界，区分体表测量、内部影像、工程推断与 R0 范围。">
+  <title>06 从服务应用到证据边界 · SGRT 技术报告 v2</title>
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/report.css">
+</head>
+<body class="report-shell" data-page="evidence">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <a class="brand" href="../../index.html" aria-label="返回 SGRT 知识系列首页"><span class="brand-mark" aria-hidden="true">S</span><span>光学体表引导<span class="brand-caption">SGRT KNOWLEDGE SERIES / TECHNICAL V2</span></span></a>
+    <nav class="header-nav" aria-label="专题切换"><a href="../../index.html">01 综合入门</a><a href="../index.html">02 技术总览</a><a href="../../technical/index.html">旧版技术页</a></nav>
+    <div class="header-meta"><span class="preview-pill">CHAPTER 06 / 06</span><span>V2 PREVIEW</span></div>
+  </header>
+
+  <main id="main" class="site-main">
+    <div class="breadcrumb"><a href="../index.html">技术总览</a><span>/</span><span>06 从服务应用到证据边界</span></div>
+    <nav class="chapter-rail" aria-label="六章导航">
+      <a href="../index.html">总览</a><a href="../surface/index.html">01 体表测量</a><a href="../coordinates/index.html">02 统一坐标</a><a href="../pose/index.html">03 参考与位姿</a><a href="../validity/index.html">04 可信度</a><a href="../feedback/index.html">05 反馈与门控</a><a href="index.html" aria-current="page">06 证据边界</a>
+    </nav>
+
+    <section class="chapter-hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">06 / SURFACE → INTERNAL</p>
+        <h1 id="page-title"><span class="chapter-number">06</span>从服务应用到<br>证据边界</h1>
+        <p class="chapter-question">体表测量能支持哪些结论，哪些还需要内部影像和独立验证？一个漂亮的外部轮廓，为什么不能自动代表体内靶区位置？</p>
+      </div>
+      <aside class="chapter-conclusion"><strong>本章工程结论</strong>体表测量不等于体内靶区位置；服务能力需要场景、真值、接口和临床流程的分别验证。</aside>
+    </section>
+
+    <div class="chapter-content">
+      <section class="chapter-intro" aria-labelledby="intro-title">
+        <div>
+          <h2 id="intro-title">把“相关”与“替代”分开</h2>
+          <p>体表是可见、连续、容易获得的信息；内部靶区位置通常需要影像或其他独立证据。两者可能相关，但相关不等于可以互相替代。尤其在呼吸、形变、不同部位和不同治疗任务中，表面变化与内部运动的关系需要单独建立和验证。</p>
+          <p>因此，本章不提供新的临床结论，而是把证据分层：哪些是公开资料支持的事实，哪些是从几何和流程得到的工程推断，哪些只是下一步要验证的工作假设。</p>
+        </div>
+        <p class="intro-note"><b>阅读目标</b>能说出“体表测量能回答什么、不能回答什么”，并知道下一步该要哪种证据，而不是只记一个产品名称。</p>
+      </section>
+
+      <figure class="main-figure">
+        <div class="figure-head"><span>MAIN FIGURE 06</span><span>SURFACE EVIDENCE + INTERNAL EVIDENCE</span></div>
+        <svg viewBox="0 0 940 300" role="img" aria-labelledby="evidence-figure-title evidence-figure-desc">
+          <title id="evidence-figure-title">体表证据与内部证据的关系</title>
+          <desc id="evidence-figure-desc">表面测量可以连续观察外部形状；内部影像在特定时刻提供内部位置证据。两类证据需要通过独立的临床流程建立关联，不能直接替换。</desc>
+          <g>
+            <rect x="24" y="40" width="390" height="218" rx="13" fill="#fff" stroke="#d3e2ef"/>
+            <text x="46" y="70" fill="#076b83" font-size="11" font-family="Consolas, monospace">SURFACE / CONTINUOUS</text>
+            <path d="M86 180C116 126 157 108 205 139C242 112 282 126 309 163C333 195 307 220 267 218C202 214 112 223 86 180Z" fill="#e8f2fa" stroke="#125bc5" stroke-width="2"/>
+            <path d="M80 188H335" stroke="#125bc5" stroke-dasharray="4 4"/>
+            <text x="218" y="242" text-anchor="middle" fill="#536b83" font-size="11">可见、连续、相对参考的外部变化</text>
+            <rect x="526" y="40" width="390" height="218" rx="13" fill="#fff7f0" stroke="#efd3bb"/>
+            <text x="548" y="70" fill="#9c521d" font-size="11" font-family="Consolas, monospace">INTERNAL / SNAPSHOT + VERIFY</text>
+            <path d="M582 179C608 132 654 116 699 143C735 119 775 130 799 164C819 190 799 219 760 222C693 225 607 220 582 179Z" fill="none" stroke="#a94f12" stroke-width="2"/>
+            <circle cx="719" cy="166" r="18" fill="#fff0e4" stroke="#a94f12" stroke-width="2"/>
+            <circle cx="719" cy="166" r="5" fill="#a94f12"/>
+            <text x="719" y="242" text-anchor="middle" fill="#536b83" font-size="11">某一时刻的内部影像 / 独立核实</text>
+            <path d="M420 149H514" stroke="#125bc5" stroke-width="2" stroke-dasharray="5 4"/>
+            <text x="467" y="139" text-anchor="middle" fill="#125bc5" font-size="10">建立关联</text>
+            <text x="470" y="286" text-anchor="middle" fill="#a94f12">相关 ≠ 替代；表面稳定 ≠ 内部靶区准确</text>
+          </g>
+        </svg>
+        <figcaption>外部形状可以连续测量，但不能自动提供内部位置。内部影像是一次或多次时刻的证据，后续表面监测仍依赖已建立的关联和适用条件。</figcaption>
+      </figure>
+
+      <section class="lab" id="experiment-surface-internal" aria-labelledby="internal-title">
+        <div class="lab-head"><div><p class="lab-kicker">MAIN EXPERIMENT / 6.1</p><h3 id="internal-title">体表与内部：相同外形能唯一确定内部位置吗？</h3><p>分别改变表面读数与内部教学变量，观察两者为什么不能互相替代。</p></div><span class="lab-tag">抽象截面 · 非患者模型</span></div>
+        <div class="lab-body">
+          <div class="lab-stage">
+            <svg viewBox="0 0 620 360" role="img" aria-labelledby="internal-scene-title internal-scene-desc">
+              <title id="internal-scene-title">相同外部轮廓下的内部状态</title>
+              <desc id="internal-scene-desc">左右两边显示表面测量与内部教学标志；表面读数可以相同，而内部标志处于不同位置。</desc>
+              <rect x="20" y="20" width="580" height="310" rx="10" fill="#0d1b29" stroke="#395a73"/>
+              <text x="170" y="56" text-anchor="middle" fill="#86d6f5" font-size="11">表面测量所见</text>
+              <text x="450" y="56" text-anchor="middle" fill="#ffb271" font-size="11">内部教学真值</text>
+              <path d="M115 288C112 238 128 196 163 168C191 145 221 154 237 185C250 211 241 242 255 265C269 288 287 295 310 292C335 289 351 267 357 239C363 207 350 172 374 145C400 116 446 132 466 173C484 211 460 246 466 274C470 292 481 300 498 300" fill="none" stroke="#86d6f5" stroke-width="2"/>
+              <path d="M365 288C362 238 378 196 413 168C441 145 471 154 487 185C500 211 491 242 505 265C519 288 537 295 560 292" fill="none" stroke="#ffb271" stroke-width="2"/>
+              <circle cx="339" cy="197" r="17" fill="none" stroke="#ffb271" stroke-width="2"/><circle cx="339" cy="197" r="5" fill="#ffb271"/>
+              <circle cx="438" cy="201" r="17" fill="none" stroke="#ffb271" stroke-width="2"/><circle cx="438" cy="201" r="5" fill="#ffb271"/>
+              <path d="M310 146H260M310 146H370" stroke="#9cdec4" stroke-dasharray="4 4"/>
+              <text x="310" y="132" text-anchor="middle" fill="#9cdec4" font-size="10">相同表面读数</text>
+              <text x="310" y="326" text-anchor="middle" fill="#b7ccdc" font-size="10">内部标志可以不同；本图不表示呼吸生理或患者数据</text>
+            </svg>
+          </div>
+          <div class="lab-controls">
+            <div class="control-row"><div class="control-title"><label for="surface-shift">体表相对参考的偏移</label><output id="surface-shift-value">0.0 mm</output></div><input id="surface-shift" type="range" min="-5" max="5" step=".5" value="0"><div class="range-scale"><span>−5 mm</span><span>0</span><span>+5 mm</span></div></div>
+            <div class="control-row"><div class="control-title"><label for="internal-shift">内部标志偏移（独立教学变量）</label><output id="internal-shift-value">6.0 mm</output></div><input id="internal-shift" type="range" min="-10" max="10" step=".5" value="6"><div class="range-scale"><span>−10 mm</span><span>0</span><span>+10 mm</span></div></div>
+            <div class="state-box" id="internal-state" role="status" aria-live="polite">当前教学状态：体表与内部标志相差 6.0 mm；相同外形不能唯一确定内部位置。</div>
+            <button class="lab-button" id="internal-verify" type="button">取得一次内部影像证据（模拟）</button>
+            <p class="control-note" id="internal-verification">一次内部影像只代表一个时刻；后续变化仍要依赖已建立的关联与适用条件。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-block" id="service-application" aria-labelledby="service-title">
+        <div class="section-heading">
+          <div><p class="eyebrow">APPLICATION / 待场景验证</p><h2 id="service-title"><span class="section-number">SERVICE</span>服务应用方向</h2></div>
+          <p>把体表测量转化为可解释、可复核、可追溯的信息。以下只是应用研究与验证问题，不是已批准的服务能力。</p>
+        </div>
+        <div class="data-table-wrap">
+          <table>
+            <thead><tr><th>服务环节</th><th>拟研究的 SGRT 支撑</th><th>需要回答的验证问题</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">治疗准备 / 摆位辅助</th><td>利用参考体表、ROI 与体位差异提示，研究怎样辅助复现已确认体位。</td><td>参考如何建立？坐标是否一致？怎样结合独立影像核实？</td></tr>
+              <tr><th scope="row">治疗过程 / 体表运动监测</th><td>研究连续呈现体表偏差与测量有效性，识别需要复核的变化。</td><td>适用于哪些部位？遮挡后如何恢复？数据是否新鲜？完整响应链多长？</td></tr>
+              <tr><th scope="row">质量管理 / 记录与追溯</th><td>研究串联标定、QA、测量、异常和回放资料，支持服务团队复盘。</td><td>记录是否完整？版本能否追溯？是否有独立真值与试验记录？</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="intro-note" style="margin-top:14px"><b>当前验证起点</b>R0 仍为单组双目、模体台架、质量/回放/QA 与模拟接口。上述方向需逐项验证后才能形成服务能力；患者应用、真实门控和设备控制另需授权与联合验证。</p>
+      </section>
+
+      <section class="section-block" id="evidence-library" aria-labelledby="library-title">
+        <div class="section-heading">
+          <div><p class="eyebrow">EVIDENCE / READ THE LIMITS</p><h2 id="library-title"><span class="section-number">SOURCE</span>证据库与支持范围</h2></div>
+          <p>来源不是结论本身。展开每条记录，阅读“支持什么”和“限制”，尤其注意指定版本、摘要/全文状态和是否属于厂商资料。</p>
+        </div>
+        <div class="evidence-list">
+          <details class="evidence-item"><summary><b>G1</b> AAPM Task Group 302: Surface-guided radiotherapy <em>guideline · verified</em></summary><div class="evidence-body"><p><b>定位：</b>Al-Hallaq HA 等 · 2022 · PMC 开放全文。</p><p><b>支持什么：</b>系统 QA、ROI、遮挡、参考和任务相关延迟的框架。</p><p><b>限制：</b>专业指南，不是单一设备的独立对照试验；商业关系见原文。</p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9314008/" target="_blank" rel="noopener">打开原始来源 ↗</a></div></details>
+          <details class="evidence-item"><summary><b>P6</b> 3D camera system <em>patent · verified</em></summary><div class="evidence-body"><p><b>定位：</b>Hanson P; Hale G / Vision RT · US20150062303A1。</p><p><b>支持什么：</b>随机纹理、局部图像块、温度稳定等公开实施例。</p><p><b>限制：</b>专利实施例不等于当前产品配置或固定窗口大小。</p><a href="https://patents.google.com/patent/US20150062303A1/en" target="_blank" rel="noopener">打开原始来源 ↗</a></div></details>
+          <details class="evidence-item"><summary><b>V1</b> Our SGRT Technology <em>vendor · verified</em></summary><div class="evidence-body"><p><b>定位：</b>Vision RT 官方技术页 · 2026-11-08 核对。</p><p><b>支持什么：</b>Active stereo、散斑投影和三角测量的公开机制。</p><p><b>限制：</b>厂商公开资料，不公开完整算法，也不是独立性能试验。</p><a href="https://visionrt.com/our-technology/" target="_blank" rel="noopener">打开原始来源 ↗</a></div></details>
+          <details class="evidence-item"><summary><b>D1</b> Camera Calibration and 3D Reconstruction <em>documentation · verified</em></summary><div class="evidence-body"><p><b>定位：</b>OpenCV 4.13.0 官方文档。</p><p><b>支持什么：</b>针孔模型、畸变、立体校正和重投影。</p><p><b>限制：</b>通用方法文档，不能证明 AlignRT 调用 OpenCV 或采用某个实现。</p><a href="https://docs.opencv.org/4.13.0/d9/d0c/group__calib3d.html" target="_blank" rel="noopener">打开原始来源 ↗</a></div></details>
+          <details class="evidence-item"><summary><b>D2</b> ICP registration <em>documentation · verified</em></summary><div class="evidence-body"><p><b>定位：</b>Open3D 0.19.0 官方教程。</p><p><b>支持什么：</b>对应更新、刚性目标函数和内点 RMSE 语义。</p><p><b>限制：</b>通用教程，不是 AlignRT 配准算法或临床验证。</p><a href="https://www.open3d.org/docs/release/tutorial/pipelines/icp_registration.html" target="_blank" rel="noopener">打开原始来源 ↗</a></div></details>
+          <details class="evidence-item"><summary><b>A2</b> Closed-form solution of absolute orientation using unit quaternions <em>paper · verified</em></summary><div class="evidence-body"><p><b>定位：</b>Horn BKP · 1987 · JOSA A 4:629–642。</p><p><b>支持什么：</b>已知对应点的绝对定向与刚体最小二乘求解。</p><p><b>限制：</b>算法原始论文不是 SGRT 产品验证；本报告只用固定尺度刚性问题。</p><a href="https://people.csail.mit.edu/bkph/papers/Absolute_Orientation_Scanned.pdf" target="_blank" rel="noopener">打开原始来源 ↗</a></div></details>
+          <details class="evidence-item"><summary><b>A3</b> A Method for Registration of 3-D Shapes <em>paper · pending</em></summary><div class="evidence-body"><p><b>定位：</b>Besl PJ; McKay ND · 1992 · IEEE TPAMI 14(2):239–256。</p><p><b>支持什么：</b>ICP 类方法的经典出处与交替对应/变换步骤。</p><p><b>限制：</b>本轮出版社全文入口受限；不能写成 AlignRT 使用原版 ICP。</p><a href="https://doi.org/10.1109/34.121791" target="_blank" rel="noopener">打开原始来源 ↗</a></div></details>
+          <details class="evidence-item"><summary><b>V3</b> AlignRT Plus — K203387, 510(k) Summary <em>regulatory · verified</em></summary><div class="evidence-body"><p><b>定位：</b>Vision RT / U.S. FDA · 2021-03-04。</p><p><b>支持什么：</b>特定版本的工作站和一至三组 3D 相机单元描述。</p><p><b>限制：</b>指定版本描述，不代表任意型号都固定三组，也不证明本项目性能或合规。</p><a href="https://www.accessdata.fda.gov/cdrh_docs/pdf20/K203387.pdf" target="_blank" rel="noopener">打开原始来源 ↗</a></div></details>
+          <details class="evidence-item"><summary><b>P1</b> Measuring the accuracy of models generated by a patient monitoring system <em>patent · verified</em></summary><div class="evidence-body"><p><b>定位：</b>Vision RT · WO2019030512A1。</p><p><b>支持什么：</b>已知模型渲染、重建和比较的 QA 实施例。</p><p><b>限制：</b>公开专利文本不等于当前产品操作流程或独立试验。</p><a href="https://patents.google.com/patent/WO2019030512A1/en" target="_blank" rel="noopener">打开原始来源 ↗</a></div></details>
+          <details class="evidence-item"><summary><b>V5</b> Real Time Coach Display <em>vendor · verified</em></summary><div class="evidence-body"><p><b>定位：</b>Vision RT 官方产品页 · 2026-11-08 核对。</p><p><b>支持什么：</b>患者视野内的呼吸与体位反馈功能描述。</p><p><b>限制：</b>未披露本演示全部阈值、白带和颜色规则；不是独立性能证据。</p><a href="https://visionrt.com/our-solutions/real-time-coach-display/" target="_blank" rel="noopener">打开原始来源 ↗</a></div></details>
+          <details class="evidence-item"><summary><b>E3</b> A novel SGRT system for real-time optical surface tracking or guidance <em>paper · verified</em></summary><div class="evidence-body"><p><b>定位：</b>Liu X 等 · 2025 · PMC 开放全文。</p><p><b>支持什么：</b>不同帧率与日志滞后、节奏拟合等动态评价线索。</p><p><b>限制：</b>跨设备研究，不能移作 AlignRT 性能；同步方法有限。</p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12256682/" target="_blank" rel="noopener">打开原始来源 ↗</a></div></details>
+          <details class="evidence-item"><summary><b>E4</b> Evaluation of dynamic accuracy and latency of a surface-guided radiotherapy system <em>paper · pending</em></summary><div class="evidence-body"><p><b>定位：</b>Yamauchi R; Tomita F · 2025 · PubMed 摘要。</p><p><b>支持什么：</b>TrueBeam + AlignRT 组合中 beam-on 时延与 ROI 影响的线索。</p><p><b>限制：</b>仅核对摘要，未取得全文；指定设备组合。</p><a href="https://pubmed.ncbi.nlm.nih.gov/39609349/" target="_blank" rel="noopener">打开原始来源 ↗</a></div></details>
+          <details class="evidence-item"><summary><b>C4</b> Accuracy and potential improvements of surface-guided breast cancer radiotherapy in DIBH <em>paper · pending</em></summary><div class="evidence-body"><p><b>定位：</b>Nankali S 等 · 2022 · PubMed 摘要。</p><p><b>支持什么：</b>表面与内部影像相关性和偏移并存的临床研究线索。</p><p><b>限制：</b>胸壁不等同所有内部靶区；摘要未覆盖全文。</p><a href="https://pubmed.ncbi.nlm.nih.gov/36084626/" target="_blank" rel="noopener">打开原始来源 ↗</a></div></details>
+        </div>
+      </section>
+
+      <section class="chapter-takeaways" aria-label="本章结论">
+        <div class="takeaway-card fact"><h3>Fact · 证据分层</h3><p>公开指南、专利、论文和监管文件分别支持不同的陈述；全文、摘要和厂商页的证据强度不同。</p></div>
+        <div class="takeaway-card inference"><h3>Inference · 系统边界</h3><p>体外测量可以连续观察外部形状；体内靶区需要独立影像或与表面建立并验证的关系。</p></div>
+        <div class="takeaway-card assumption"><h3>Assumption · 应用方向</h3><p>中玖闪光的服务应用仍属于待场景验证的研究方向，不是当前 R0 已实现能力。</p></div>
+      </section>
+
+      <section class="chapter-boundary" aria-labelledby="boundary-title">
+        <div><h2 id="boundary-title">报告到这里结束，证据链继续</h2><p>本报告能帮助产品/研发和临床协作者建立共同语言：知道一个数字来自哪一层、它需要什么前提、下一步该要哪种证据。它不能替代器械注册、临床评价、机房验收或机构协议。</p><div class="inline-tags"><span class="tag tag--fact">Fact 可追溯</span><span class="tag tag--inference">Inference 可讨论</span><span class="tag tag--assumption">Assumption 待验证</span></div></div>
+        <div class="boundary-list"><div><b>R0 范围</b><span>单组双目 · 模体台架 · 本地工作站 · 模拟接口</span></div><div><b>不包含</b><span>真实出束控制 · 自动移床 · 真实患者 · 临床结论</span></div><div><b>下一步</b><span>场景验证 · 独立真值 · 完整响应链</span></div></div>
+      </section>
+    </div>
+
+    <nav class="page-nav-bottom" aria-label="章节翻页">
+      <a href="../feedback/index.html" rel="prev"><small>上一章 / 05</small><strong>← 从测量到反馈与门控</strong></a>
+      <a class="home-link" href="../index.html">回系统地图</a>
+      <a href="../index.html" rel="next"><small>完成阅读</small><strong>返回技术总览 →</strong></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer"><div class="footer-row"><span>SGRT 技术报告 v2 · 06 从服务应用到证据边界</span><div class="footer-links"><a href="../index.html">系统总览</a><a href="../../technical/index.html">旧版技术页</a><a href="#main">回到顶部 ↑</a></div></div><p class="footer-fine">Fact 有来源 · Inference 是工程推导 · Assumption 是工作假设 · 本页不构成产品规格、临床建议或注册证据。</p></footer>
+  <script src="../assets/report-data.js"></script><script src="../assets/report.js" defer></script>
+</body>
+</html>

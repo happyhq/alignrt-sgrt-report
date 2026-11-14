@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f3f7fb">
+  <meta name="description" content="SGRT 技术报告第三章：从参考体表、ROI、配准到六自由度位姿，理解平移、旋转和旋转中心。">
+  <title>03 从参考到六自由度位姿 · SGRT 技术报告 v2</title>
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/report.css">
+</head>
+<body class="report-shell" data-page="pose">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <a class="brand" href="../../index.html" aria-label="返回 SGRT 知识系列首页"><span class="brand-mark" aria-hidden="true">S</span><span>光学体表引导<span class="brand-caption">SGRT KNOWLEDGE SERIES / TECHNICAL V2</span></span></a>
+    <nav class="header-nav" aria-label="专题切换"><a href="../../index.html">01 综合入门</a><a href="../index.html">02 技术总览</a><a href="../../technical/index.html">旧版技术页</a></nav>
+    <div class="header-meta"><span class="preview-pill">CHAPTER 03 / 06</span><span>V2 PREVIEW</span></div>
+  </header>
+
+  <main id="main" class="site-main">
+    <div class="breadcrumb"><a href="../index.html">技术总览</a><span>/</span><span>03 从参考到六自由度位姿</span></div>
+    <nav class="chapter-rail" aria-label="六章导航">
+      <a href="../index.html">总览</a><a href="../surface/index.html">01 体表测量</a><a href="../coordinates/index.html">02 统一坐标</a><a href="index.html" aria-current="page">03 参考与位姿</a><a href="../validity/index.html">04 可信度</a><a href="../feedback/index.html">05 反馈与门控</a><a href="../evidence/index.html">06 证据边界</a>
+    </nav>
+
+    <section class="chapter-hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">03 / REFERENCE → 6DoF</p>
+        <h1 id="page-title"><span class="chapter-number">03</span>从参考到<br>六自由度位姿</h1>
+        <p class="chapter-question">当前表面相对参考表面差了多少？为什么 ROI、参考来源和旋转中心会改变这个“差多少”的含义？</p>
+      </div>
+      <aside class="chapter-conclusion"><strong>本章工程结论</strong>零偏差只对当前参考成立；ROI 的可观测形状决定位姿能不能被唯一辨别。</aside>
+    </section>
+
+    <div class="chapter-content">
+      <section class="chapter-intro" aria-labelledby="intro-title">
+        <div>
+          <h2 id="intro-title">“把数字变绿”不是配准的定义</h2>
+          <p>参考体表定义比较的基准，ROI 决定哪些表面点参与计算，刚性配准寻找当前表面相对参考的旋转和平移。平移与旋转合在一起是 6 个自由度，但它们都依赖坐标轴、正负号和旋转中心。</p>
+          <p>如果参考本身来自一个没有经过独立确认的体位，偏差归零只说明“当前表面接近这份参考”，不能说明患者处在计划位置。参考更新必须受控，不能被当作把数字清零的操作按钮。</p>
+        </div>
+        <p class="intro-note"><b>三个问题</b>参考是谁定义的？ROI 是否包含足够的形状约束？旋转中心与设备协议是否一致？</p>
+      </section>
+
+      <figure class="main-figure">
+        <div class="figure-head"><span>MAIN FIGURE 03</span><span>REFERENCE → ROI → RIGID TRANSFORM</span></div>
+        <svg viewBox="0 0 940 300" role="img" aria-labelledby="pose-figure-title pose-figure-desc">
+          <title id="pose-figure-title">参考体表、ROI 与六自由度位姿</title>
+          <desc id="pose-figure-desc">参考表面与当前表面在ROI内建立对应，刚性配准求取三个平移和三个旋转；旋转中心决定角度变化对应的空间位移。</desc>
+          <defs><marker id="pose-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#125bc5"/></marker></defs>
+          <g>
+            <rect x="20" y="36" width="210" height="214" rx="12" fill="#fff" stroke="#d3e2ef"/>
+            <text x="42" y="66" fill="#076b83" font-size="11" font-family="Consolas, monospace">REFERENCE</text>
+            <path d="M50 170C73 122 100 112 125 140C147 104 180 112 199 152C211 177 188 201 155 198C110 194 74 204 50 170Z" fill="#e8f2fa" stroke="#125bc5" stroke-width="2"/>
+            <path d="M65 172H188" stroke="#125bc5" stroke-dasharray="4 4"/>
+            <text x="125" y="227" text-anchor="middle" fill="#536b83" font-size="11">已确认参考 / 版本可追溯</text>
+            <path d="M244 143H286" stroke="#125bc5" stroke-width="2" marker-end="url(#pose-arrow)"/>
+            <rect x="300" y="36" width="240" height="214" rx="12" fill="#e8f2fa" stroke="#d3e2ef"/>
+            <text x="322" y="66" fill="#076b83" font-size="11" font-family="Consolas, monospace">ROI / CONSTRAINTS</text>
+            <path d="M326 174C350 124 378 112 404 141C425 108 459 118 477 158C489 183 468 202 437 200C393 197 352 207 326 174Z" fill="#fff" stroke="#125bc5" stroke-width="2"/>
+            <path d="M348 180C371 142 394 136 415 155C438 129 461 139 473 170" fill="none" stroke="#087f9d" stroke-width="2" stroke-dasharray="5 4"/>
+            <text x="420" y="224" text-anchor="middle" fill="#536b83" font-size="11">形状 + 覆盖 → 可观测性</text>
+            <path d="M554 143H596" stroke="#125bc5" stroke-width="2" marker-end="url(#pose-arrow)"/>
+            <rect x="610" y="36" width="306" height="214" rx="12" fill="#fff" stroke="#d3e2ef"/>
+            <text x="632" y="66" fill="#076b83" font-size="11" font-family="Consolas, monospace">RIGID TRANSFORM</text>
+            <path d="M676 166C700 126 731 113 760 142C781 116 814 124 841 157C851 176 830 198 800 197C748 196 700 199 676 166Z" fill="#e8f2fa" stroke="#a94f12" stroke-width="2"/>
+            <path d="M756 185v-48M732 161h48" stroke="#102e50" stroke-width="1.4" stroke-dasharray="3 3"/>
+            <circle cx="756" cy="161" r="8" fill="none" stroke="#a94f12" stroke-width="2"/>
+            <text x="756" y="224" text-anchor="middle" fill="#536b83" font-size="11">tx, ty, tz + rx, ry, rz</text>
+            <text x="756" y="241" text-anchor="middle" fill="#a94f12" font-size="10">旋转中心改变角度位移</text>
+          </g>
+        </svg>
+        <figcaption>配准输出是“当前表面相对参考的变换”，不是“体内靶区已经正确”。参考来源、ROI、坐标轴和旋转中心必须与设备和流程协议一致。</figcaption>
+      </figure>
+
+      <section class="lab" id="experiment-pose" aria-labelledby="pose-title">
+        <div class="lab-head"><div><p class="lab-kicker">MAIN EXPERIMENT / 3.3</p><h3 id="pose-title">6DoF：平移、旋转和旋转中心怎样共同作用？</h3><p>移动教学轮廓，观察位姿读数和 ROI 可观测性；这不是治疗床控制界面。</p></div><span class="lab-tag">二维教学 · 非设备界面</span></div>
+        <div class="lab-body">
+          <div class="lab-stage">
+            <svg id="pose-scene" viewBox="0 0 620 360" role="img" aria-labelledby="pose-scene-title pose-scene-desc">
+              <title id="pose-scene-title">六自由度位姿和可观测范围</title>
+              <desc id="pose-scene-desc">参考轮廓保持不动，当前轮廓随平移和旋转控件变化；ROI 大小改变可用于估计位姿的表面范围。</desc>
+              <rect x="20" y="20" width="580" height="310" rx="10" fill="#0d1b29" stroke="#395a73"/>
+              <path d="M64 288H556M310 288V54" stroke="#395a73" stroke-width="1" stroke-dasharray="5 6"/>
+              <path d="M122 254C153 188 202 159 260 178C303 192 344 165 391 181C450 201 482 242 505 287" fill="none" stroke="#86d6f5" stroke-width="2" stroke-dasharray="7 5"/>
+              <text x="130" y="74" fill="#86d6f5" font-size="11">参考 ROI</text>
+              <g id="pose-target">
+                <path d="M146 270C173 213 220 197 266 209C307 219 348 193 387 211C435 233 465 260 482 294" fill="none" stroke="#ffb271" stroke-width="3"/>
+                <circle cx="310" cy="232" r="6" fill="#ffb271"/>
+              </g>
+              <path d="M210 288A38 38 0 0 1 286 288" fill="none" stroke="#9cdec4" stroke-width="2"/>
+              <text x="248" y="321" text-anchor="middle" fill="#9cdec4" font-size="10">旋转中心</text>
+              <text x="462" y="74" fill="#ffb271" font-size="11">当前表面</text>
+            </svg>
+          </div>
+          <div class="lab-controls">
+            <div class="control-row"><div class="control-title"><label for="pose-tx">平移 x</label><output id="pose-tx-value">0.0 mm</output></div><input id="pose-tx" type="range" min="-20" max="20" step=".5" value="0"><div class="range-scale"><span>−20</span><span>0</span><span>+20</span></div></div>
+            <div class="control-row"><div class="control-title"><label for="pose-ty">平移 y</label><output id="pose-ty-value">0.0 mm</output></div><input id="pose-ty" type="range" min="-20" max="20" step=".5" value="0"><div class="range-scale"><span>−20</span><span>0</span><span>+20</span></div></div>
+            <div class="control-row"><div class="control-title"><label for="pose-rot">旋转 θ</label><output id="pose-rot-value">0.0°</output></div><input id="pose-rot" type="range" min="-10" max="10" step=".5" value="0"><div class="range-scale"><span>−10°</span><span>0</span><span>+10°</span></div></div>
+            <div class="control-row"><div class="control-title"><label for="pose-roi">ROI 覆盖</label><output id="pose-roi-value">65%</output></div><input id="pose-roi" type="range" min="10" max="100" step="5" value="65"><div class="range-scale"><span>小</span><span>中</span><span>大</span></div></div>
+            <div class="lab-readout"><b>可 观 测 性</b><strong id="pose-leverage">中</strong><span>不是精度数值；表示形状约束的教学提示</span></div>
+            <div class="state-box" id="pose-state" role="status" aria-live="polite">ROI 形状提供约束；6DoF 仍依赖参考、旋转中心和坐标协议，不等于自动移床。</div>
+          </div>
+        </div>
+      </section>
+
+      <details class="experiment-details" id="experiment-reference">
+        <summary><span>实验 3.1 · 旧 09</span> 参考管理：偏差为零时，谁定义了零？ <span>reference</span></summary>
+        <div class="details-body">
+          <p>参考可以来自计划 CT 外轮廓，也可以来自某次经过内部影像复核后采集的相机表面。两种来源都需要记录患者、疗程、用途、确认人和版本。更新参考不是把偏差清零，而是改变后续测量的基准。</p>
+          <div class="inline-tags"><span class="tag tag--fact">G1 · 参考与 QA 框架</span><span class="tag tag--inference">Inference · 基准风险</span><span class="tag tag--assumption">Assumption · 每份参考可追溯</span></div>
+          <p><b>工程问题：</b>如果参考在错误体位下建立，后续“零偏差”是否仍然有临床意义？本页的回答是：不能仅凭归零判断。</p>
+        </div>
+      </details>
+
+      <details class="experiment-details" id="experiment-roi">
+        <summary><span>实验 3.2 · 旧 08</span> ROI：看见表面，为什么仍可能判断不唯一？ <span>roi</span></summary>
+        <div class="details-body">
+          <p>ROI 不是越大越好，也不是越小越安全。平坦、对称或局部遮挡的区域可能缺少区分旋转和平移的几何特征；包含独立运动部位又会把无关变化带入拟合。</p>
+          <div class="lab-grid-2" style="margin-top:12px">
+            <div class="takeaway-card inference"><h3>少了什么</h3><p>区域过小时，多个位姿解可能都得到低残差。</p></div>
+            <div class="takeaway-card assumption"><h3>多了什么</h3><p>区域混入无关运动时，残差不再只代表整体位姿。</p></div>
+          </div>
+          <p><b>结论：</b>ROI 的质量取决于临床任务、表面特征和可见性，不能用一个固定面积阈值替代。</p>
+        </div>
+      </details>
+
+      <section class="chapter-takeaways" aria-label="本章结论">
+        <div class="takeaway-card fact"><h3>Fact · 配准</h3><p>刚性配准可以用旋转和平移描述相对位姿；已知对应点的绝对定向有公开的数学方法。</p></div>
+        <div class="takeaway-card inference"><h3>Inference · 可观测性</h3><p>ROI 的形状约束会影响位姿是否可辨识；低残差和正确位姿不是同义词。</p></div>
+        <div class="takeaway-card assumption"><h3>Assumption · 临床流程</h3><p>参考和 ROI 由经过批准的工作流程与专业角色确认；本页不提供患者设置或阈值。</p></div>
+      </section>
+
+      <section class="chapter-boundary" aria-labelledby="boundary-title">
+        <div><h2 id="boundary-title">本章能回答什么？</h2><p>能解释参考、ROI、刚体变换和旋转中心的关系；能说明为什么“归零”不能替代参考确认。不能从六个读数推出治疗床能自动执行，也不能推出内部靶区位置。</p><div class="inline-tags"><span class="tag tag--fact">G1</span><span class="tag tag--fact">D2</span><span class="tag tag--fact">A2</span></div></div>
+        <div class="boundary-list"><div><b>不能回答</b><span>参考体位本身是否正确</span></div><div><b>不能回答</b><span>ROI 对特定患者是否充分</span></div><div><b>需要下一章</b><span>残差、覆盖与有效性状态</span></div></div>
+      </section>
+    </div>
+
+    <nav class="page-nav-bottom" aria-label="章节翻页">
+      <a href="../coordinates/index.html" rel="prev"><small>上一章 / 02</small><strong>← 从多视角到统一坐标</strong></a>
+      <a class="home-link" href="../index.html">回系统地图</a>
+      <a href="../validity/index.html" rel="next"><small>下一章 / 04</small><strong>从配准到跟踪可信 →</strong></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer"><div class="footer-row"><span>SGRT 技术报告 v2 · 03 从参考到六自由度位姿</span><div class="footer-links"><a href="../index.html">系统总览</a><a href="../../technical/index.html">旧版技术页</a><a href="#main">回到顶部 ↑</a></div></div><p class="footer-fine">二维教学变换 · 不代表治疗床接口、临床阈值或自动移床能力。</p></footer>
+  <script src="../assets/report-data.js"></script><script src="../assets/report.js" defer></script>
+</body>
+</html>

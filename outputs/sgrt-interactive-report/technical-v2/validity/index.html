@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f3f7fb">
+  <meta name="description" content="SGRT 技术报告第四章：从配准到跟踪可信，理解残差、覆盖、几何约束、新鲜度和不可用状态。">
+  <title>04 从配准到跟踪可信 · SGRT 技术报告 v2</title>
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/report.css">
+</head>
+<body class="report-shell" data-page="validity">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <a class="brand" href="../../index.html" aria-label="返回 SGRT 知识系列首页"><span class="brand-mark" aria-hidden="true">S</span><span>光学体表引导<span class="brand-caption">SGRT KNOWLEDGE SERIES / TECHNICAL V2</span></span></a>
+    <nav class="header-nav" aria-label="专题切换"><a href="../../index.html">01 综合入门</a><a href="../index.html">02 技术总览</a><a href="../../technical/index.html">旧版技术页</a></nav>
+    <div class="header-meta"><span class="preview-pill">CHAPTER 04 / 06</span><span>V2 PREVIEW</span></div>
+  </header>
+
+  <main id="main" class="site-main">
+    <div class="breadcrumb"><a href="../index.html">技术总览</a><span>/</span><span>04 从配准到跟踪可信</span></div>
+    <nav class="chapter-rail" aria-label="六章导航">
+      <a href="../index.html">总览</a><a href="../surface/index.html">01 体表测量</a><a href="../coordinates/index.html">02 统一坐标</a><a href="../pose/index.html">03 参考与位姿</a><a href="index.html" aria-current="page">04 可信度</a><a href="../feedback/index.html">05 反馈与门控</a><a href="../evidence/index.html">06 证据边界</a>
+    </nav>
+
+    <section class="chapter-hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">04 / REGISTRATION → TRUST</p>
+        <h1 id="page-title"><span class="chapter-number">04</span>从配准到<br>跟踪可信</h1>
+        <p class="chapter-question">一个很小的残差，什么时候仍可能是一个不可用的测量？跟踪系统必须同时回答“贴得近不近”和“这次观测足不足以支撑结论”。</p>
+      </div>
+      <aside class="chapter-conclusion"><strong>本章工程结论</strong>低残差、足够覆盖、几何约束和数据新鲜度是不同条件；无数据不能读成零运动。</aside>
+    </section>
+
+    <div class="chapter-content">
+      <section class="chapter-intro" aria-labelledby="intro-title">
+        <div>
+          <h2 id="intro-title">有效性不是一个分数</h2>
+          <p>配准残差描述当前拟合的点对有多接近；覆盖描述还有多少表面参与；几何约束描述这些表面能否区分不同位姿；新鲜度描述当前画面是否还在更新。一个系统即使残差很低，也可能因为挡住了大半体表、只剩平坦区域，或者一直显示旧帧而不可用。</p>
+          <p>因此界面应该区分数值、状态和原因：<strong>不可用</strong>不是零偏差，<strong>降级</strong>不是治疗许可，<strong>通过</strong>也不是临床结论。</p>
+        </div>
+        <p class="intro-note"><b>四类检查</b>残差 · 覆盖 · 约束 · 新鲜度。再加上版本、参考和 QA 状态，才接近一个可运营的有效性判断。</p>
+      </section>
+
+      <figure class="main-figure">
+        <div class="figure-head"><span>MAIN FIGURE 04</span><span>RESIDUAL + COVERAGE + CONSTRAINT + FRESHNESS</span></div>
+        <svg viewBox="0 0 940 300" role="img" aria-labelledby="validity-figure-title validity-figure-desc">
+          <title id="validity-figure-title">从配准结果到跟踪可用状态</title>
+          <desc id="validity-figure-desc">配准残差只是输入端之一；覆盖、几何约束和数据新鲜度共同决定有效、降级或不可用。</desc>
+          <defs><marker id="validity-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#a94f12"/></marker></defs>
+          <g font-size="11">
+            <rect x="18" y="54" width="164" height="160" rx="12" fill="#fff" stroke="#d3e2ef"/>
+            <text x="38" y="83" fill="#076b83" font-family="Consolas, monospace">RESIDUAL</text>
+            <path d="M48 180l27-38 25 18 30-52 34 28 18-19" fill="none" stroke="#125bc5" stroke-width="2"/>
+            <text x="100" y="198" text-anchor="middle" fill="#536b83">贴得近不近？</text>
+            <path d="M196 134H236" stroke="#a94f12" stroke-width="2" marker-end="url(#validity-arrow)"/>
+            <rect x="250" y="54" width="164" height="160" rx="12" fill="#e8f2fa" stroke="#d3e2ef"/>
+            <text x="270" y="83" fill="#076b83" font-family="Consolas, monospace">COVERAGE</text>
+            <g fill="#125bc5"><circle cx="290" cy="120" r="3"/><circle cx="310" cy="112" r="3"/><circle cx="333" cy="130" r="3"/><circle cx="359" cy="110" r="3"/><circle cx="382" cy="137" r="3"/><circle cx="300" cy="158" r="3"/><circle cx="338" cy="164" r="3"/><circle cx="374" cy="154" r="3"/></g>
+            <path d="M274 186C308 161 346 158 392 181" fill="none" stroke="#aec9de" stroke-width="2" stroke-dasharray="4 4"/>
+            <text x="332" y="198" text-anchor="middle" fill="#536b83">还看见多少？</text>
+            <path d="M428 134H468" stroke="#a94f12" stroke-width="2" marker-end="url(#validity-arrow)"/>
+            <rect x="482" y="54" width="164" height="160" rx="12" fill="#fff" stroke="#d3e2ef"/>
+            <text x="502" y="83" fill="#076b83" font-family="Consolas, monospace">CONSTRAINT</text>
+            <path d="M516 168L540 109L571 151L608 96L626 157" fill="none" stroke="#a94f12" stroke-width="2"/>
+            <text x="564" y="198" text-anchor="middle" fill="#536b83">能区分位姿吗？</text>
+            <path d="M660 134H700" stroke="#a94f12" stroke-width="2" marker-end="url(#validity-arrow)"/>
+            <rect x="714" y="54" width="206" height="160" rx="12" fill="#fff7f0" stroke="#efd3bb"/>
+            <text x="734" y="83" fill="#9c521d" font-family="Consolas, monospace">USABILITY STATE</text>
+            <rect x="738" y="105" width="158" height="34" rx="6" fill="#e3f4ed" stroke="#b8ddce"/><text x="817" y="127" fill="#19795f" text-anchor="middle">VALID</text>
+            <rect x="738" y="148" width="158" height="34" rx="6" fill="#fff0e4" stroke="#efcfb6"/><text x="817" y="170" fill="#9c521d" text-anchor="middle">DEGRADED</text>
+            <text x="817" y="202" fill="#536b83" text-anchor="middle">或 UNAVAILABLE</text>
+            <text x="470" y="256" text-anchor="middle" fill="#a94f12">状态词是接口语义，不是临床许可；具体映射须按 R0 规范和批准流程。</text>
+          </g>
+        </svg>
+        <figcaption>残差低不等于有效；覆盖高也不等于姿态可辨识；新鲜度则决定当前画面是不是“现在”。图中的状态词仅作教学说明。</figcaption>
+      </figure>
+
+      <section class="lab" id="experiment-validity" aria-labelledby="validity-title">
+        <div class="lab-head"><div><p class="lab-kicker">MAIN EXPERIMENT / 4.4</p><h3 id="validity-title">跟踪有效性：无数据为什么不能当作零运动？</h3><p>关闭 POD、增加遮挡或使用旧帧，观察可用状态怎样变化。</p></div><span class="lab-tag">状态机教学 · 非临床接口</span></div>
+        <div class="lab-body">
+          <div class="lab-stage">
+            <svg viewBox="0 0 620 360" role="img" aria-labelledby="validity-scene-title validity-scene-desc">
+              <title id="validity-scene-title">三个POD、遮挡和可见表面</title>
+              <desc id="validity-scene-desc">三组相机从不同方向观察体表。关闭POD或增加遮挡会减少可见表面；没有可用数据时应显示不可用。</desc>
+              <rect x="20" y="20" width="580" height="310" rx="10" fill="#0d1b29" stroke="#395a73"/>
+              <ellipse cx="310" cy="194" rx="118" ry="60" fill="#142b40" stroke="#86d6f5"/>
+              <path d="M230 195C258 163 286 158 314 178C342 150 374 164 390 192" fill="none" stroke="#86d6f5" stroke-width="2"/>
+              <g fill="#ffb271" stroke="#ffb271"><circle cx="92" cy="92" r="5"/><circle cx="310" cy="61" r="5"/><circle cx="528" cy="92" r="5"/></g>
+              <path d="M92 92L310 194M310 61L310 194M528 92L310 194" stroke="#86d6f5" stroke-width="1" stroke-dasharray="4 5"/>
+              <text x="82" y="75" fill="#86d6f5" font-size="11">POD 1</text><text x="296" y="45" fill="#86d6f5" font-size="11">POD 2</text><text x="518" y="75" fill="#86d6f5" font-size="11">POD 3</text>
+              <path d="M178 138C211 155 235 178 244 211L195 238C174 204 158 173 178 138Z" fill="#e77c2c" fill-opacity=".18" stroke="#e77c2c" stroke-dasharray="4 4"/>
+              <text x="202" y="186" fill="#ffb271" font-size="10" text-anchor="middle">遮挡</text>
+              <text x="310" y="310" text-anchor="middle" fill="#b7ccdc" font-size="10">可见点、约束和数据时间共同决定状态</text>
+            </svg>
+          </div>
+          <div class="lab-controls">
+            <div class="control-row"><div class="control-title"><span>启用 POD</span><span>点击切换</span></div><div class="lab-grid-2" style="margin-top:8px" role="group" aria-label="启用POD"><button class="lab-button" type="button" data-validity-pod="1" aria-pressed="true">POD 1</button><button class="lab-button" type="button" data-validity-pod="2" aria-pressed="true">POD 2</button><button class="lab-button" type="button" data-validity-pod="3" aria-pressed="true">POD 3</button></div></div>
+            <div class="control-row"><label class="control-title" for="validity-occlusion"><span><input id="validity-occlusion" type="checkbox"> 机架/附件遮挡</span><output>降低覆盖</output></label></div>
+            <div class="control-row"><label class="control-title" for="validity-stale"><span><input id="validity-stale" type="checkbox"> 数据未更新</span><output>旧帧</output></label></div>
+            <div class="control-row"><label class="control-title" for="validity-ghost"><span><input id="validity-ghost" type="checkbox"> 几何约束不足</span><output>平坦区域</output></label></div>
+            <div class="lab-readout"><b>VALIDITY STATE</b><strong id="validity-state" data-state="ok">VALID</strong><span>覆盖 <span id="validity-coverage">90%</span> · 约束 <span id="validity-constraint">0.64</span></span></div>
+            <div class="state-box" id="validity-reasons" role="status" aria-live="polite">残差、覆盖、约束和新鲜度同时通过教学检查。</div>
+          </div>
+        </div>
+      </section>
+
+      <details class="experiment-details" id="experiment-registration">
+        <summary><span>实验 4.1 · 旧 06</span> 绝对精度与配准：位置偏了，还是位移量错了？ <span>QA</span></summary>
+        <div class="details-body">
+          <p>把已知模体从 0 移到 10 mm，系统读数可能同时包含零点偏移和比例误差。两次读数相减仍接近 10 mm，并不能排除绝对位置偏差；反之，绝对位置正确也不代表动态位移一定正确。</p>
+          <div class="lab-grid-2" style="margin-top:14px">
+            <div><div class="control-title"><label for="qa-bias">零点偏移 b</label><output>教学参数</output></div><input id="qa-bias" type="range" min="-3" max="3" step=".1" value="1.5"><div class="range-scale"><span>−3 mm</span><span>0</span><span>+3 mm</span></div></div>
+            <div><div class="control-title"><label for="qa-scale">比例误差 ε</label><output id="qa-scale-value">+0.0%</output></div><input id="qa-scale" type="range" min="-10" max="10" step=".5" value="0"><div class="range-scale"><span>−10%</span><span>0</span><span>+10%</span></div></div>
+          </div>
+          <div class="lab-readout"><b>合 成 读 数</b><strong id="qa-ten">11.50 mm</strong><span>0 mm 位置：<span id="qa-zero">1.50 mm</span> · 10 mm 位置</span></div>
+          <div class="state-box" id="qa-state" role="status" aria-live="polite">零点读数 1.50 mm；10 mm 位移读数 11.50 mm。绝对偏差与位移量偏差要分开看。</div>
+          <p><button class="lab-button" id="qa-reset" type="button">切换到理想设备示例</button></p>
+          <div class="data-table-wrap"><table><thead><tr><th>检查项</th><th>要问的问题</th><th>需要的证据</th></tr></thead><tbody><tr><td>绝对偏差</td><td>读数与独立真值差多少？</td><td>已知位置、独立量具/成像基准</td></tr><tr><td>位移量</td><td>改变已知距离后，读数变化对不对？</td><td>多个位置、重复测量</td></tr><tr><td>重复性/漂移</td><td>同一条件 repeated 是否稳定？</td><td>时间序列、维护记录</td></tr></tbody></table></div>
+          <p><b>边界：</b>本页不设置临床合格阈值，也不把合成模型当作验收记录。</p>
+        </div>
+      </details>
+
+      <details class="experiment-details" id="experiment-solver">
+        <summary><span>实验 4.2 · 旧 12</span> 配准求解：残差变小，为什么不一定更接近真值？ <span>solver</span></summary>
+        <div class="details-body">
+          <p>最近邻对应、初值、局部极小值和遮挡会让优化停在一个“看起来贴合”的位置。拟合 RMS 只衡量被接受点对的贴合；独立真值误差回答的是另一件事。</p>
+          <p>因此，评价配准不能只看一个残差数字，还要看对应策略、内点覆盖、初值敏感性和独立验证。</p>
+          <div class="inline-tags"><span class="tag tag--fact">D2 · ICP 教程</span><span class="tag tag--inference">Inference · 局部极小</span><span class="tag tag--assumption">Assumption · 合成初始位姿</span></div>
+        </div>
+      </details>
+
+      <details class="experiment-details" id="experiment-residual">
+        <summary><span>实验 4.3 · 旧 13</span> 形变残差：去掉刚体位姿后，还剩下什么？ <span>residual</span></summary>
+        <div class="details-body">
+          <p>局部形变不能用整体刚性变换完全解释。残差图可以帮助发现某个区域持续偏离，但它不是形变校正，也不是内部器官位置证据。</p>
+          <p>工程上应区分：拟合残差、局部形变指标、覆盖变化和内部影像证据。它们回答不同问题，不能被一个绿色状态合并。</p>
+        </div>
+      </details>
+
+      <section class="chapter-takeaways" aria-label="本章结论">
+        <div class="takeaway-card fact"><h3>Fact · 质量链</h3><p>配准残差、覆盖、约束和数据新鲜度都在公开的 QA/技术讨论中有对应位置。</p></div>
+        <div class="takeaway-card inference"><h3>Inference · 可用性</h3><p>有效性应由多个条件合成，并输出明确原因；不可用应当可见，而不是当作零偏差。</p></div>
+        <div class="takeaway-card assumption"><h3>Assumption · 状态映射</h3><p>本页状态词是教学示例，真实系统状态和接口语义需按受控规范与批准流程。</p></div>
+      </section>
+
+      <section class="chapter-boundary" aria-labelledby="boundary-title">
+        <div><h2 id="boundary-title">本章能回答什么？</h2><p>能解释低残差为什么不是完整有效性证明，为什么无数据不能读成零运动，以及 QA、配准和形变残差各自回答什么问题。不能从本页推出临床阈值、自动停束逻辑或患者安全结论。</p><div class="inline-tags"><span class="tag tag--fact">G1</span><span class="tag tag--fact">P1</span><span class="tag tag--fact">E3</span></div></div>
+        <div class="boundary-list"><div><b>不能回答</b><span>某个残差值是否可接受</span></div><div><b>不能回答</b><span>遮挡后应不应该允许出束</span></div><div><b>需要下一章</b><span>反馈、门控和端到端时延</span></div></div>
+      </section>
+    </div>
+
+    <nav class="page-nav-bottom" aria-label="章节翻页">
+      <a href="../pose/index.html" rel="prev"><small>上一章 / 03</small><strong>← 从参考到六自由度位姿</strong></a>
+      <a class="home-link" href="../index.html">回系统地图</a>
+      <a href="../feedback/index.html" rel="next"><small>下一章 / 05</small><strong>从测量到反馈与门控 →</strong></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer"><div class="footer-row"><span>SGRT 技术报告 v2 · 04 从配准到跟踪可信</span><div class="footer-links"><a href="../index.html">系统总览</a><a href="../../technical/index.html">旧版技术页</a><a href="#main">回到顶部 ↑</a></div></div><p class="footer-fine">状态机教学 · 合成场景 · 不代表真实接口、临床阈值或自动治疗控制。</p></footer>
+  <script src="../assets/report-data.js"></script><script src="../assets/report.js" defer></script>
+</body>
+</html>

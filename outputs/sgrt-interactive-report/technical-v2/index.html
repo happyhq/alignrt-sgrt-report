@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f3f7fb">
+  <meta name="description" content="SGRT 技术原理与应用 v2：一张系统地图、六章阅读路径、15 个可交互实验，区分事实、工程推断与工作假设。">
+  <title>SGRT 技术原理与应用 · 技术总览</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/report.css">
+</head>
+<body class="report-shell" data-page="hub">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <a class="brand" href="../index.html" aria-label="返回 SGRT 知识系列首页">
+      <span class="brand-mark" aria-hidden="true">S</span>
+      <span>光学体表引导<span class="brand-caption">SGRT KNOWLEDGE SERIES / TECHNICAL V2</span></span>
+    </a>
+    <nav class="header-nav" aria-label="专题切换">
+      <a href="../index.html">01 综合入门</a>
+      <a href="index.html" aria-current="page">02 技术总览</a>
+      <a href="../technical/index.html">旧版技术页</a>
+    </nav>
+    <div class="header-meta">
+      <span class="preview-pill">V2 PREVIEW</span>
+      <span>2026-11-14</span>
+    </div>
+  </header>
+
+  <main id="main" class="site-main">
+    <section class="hub-hero" aria-labelledby="report-title">
+      <div>
+        <p class="eyebrow">SURFACE GUIDED RADIATION THERAPY / SYSTEM LITERACY</p>
+        <h1 id="report-title">SGRT 技术原理<em>与应用</em></h1>
+        <p class="hero-subtitle">先看一张系统地图，再沿六个问题进入体表采集、坐标标定、参考配准、可信度判断、反馈门控与证据边界。面向产品/研发人员与临床协作者，不把演示界面当成临床结论。</p>
+        <div class="hero-tags" aria-label="报告范围与证据层级">
+          <span class="tag">6 章阅读主线</span>
+          <span class="tag">15 个实验索引</span>
+          <span class="tag tag--fact">Fact 有来源</span>
+          <span class="tag tag--inference">Inference 工程推断</span>
+          <span class="tag tag--assumption">Assumption 工作假设</span>
+        </div>
+        <div class="hero-actions">
+          <a class="primary-link" href="#system-overview">打开系统总览 <span aria-hidden="true">↓</span></a>
+          <a class="secondary-link" href="#chapters">直接选择章节 <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+      <aside class="hero-panel" aria-label="阅读路径概览">
+        <div class="panel-top"><span>TECHNICAL READING MAP</span><span>R0 / ENGINEERING</span></div>
+        <h2 class="panel-title">从可见表面到可复核结论</h2>
+        <p class="panel-question">每一章只回答一个问题，并把“能回答什么 / 不能回答什么”留在同一页。</p>
+        <div class="panel-chain">
+          <div class="chain-row"><span>01</span><div><b>体表变成三维测量</b><small>纹理、对应、三角测量</small></div></div>
+          <div class="chain-row"><span>02</span><div><b>多视角进入统一坐标</b><small>标定、POD、治疗室基准</small></div></div>
+          <div class="chain-row"><span>03</span><div><b>参考变成 6DoF 位姿</b><small>ROI、刚体变换、旋转中心</small></div></div>
+          <div class="chain-row"><span>04</span><div><b>配准变成可用状态</b><small>残差、覆盖、新鲜度</small></div></div>
+          <div class="chain-row"><span>05</span><div><b>测量进入反馈与门控</b><small>判定、接口、端到端时延</small></div></div>
+          <div class="chain-row"><span>06</span><div><b>体表证据进入边界</b><small>内部影像、服务应用、R0</small></div></div>
+        </div>
+        <p class="panel-foot"><strong>起点不是产品参数，而是问题。</strong>页面中的合成数值均为教学示例；具体设备和临床流程需另行核对。</p>
+      </aside>
+    </section>
+
+    <section class="section-block" id="system-overview" aria-labelledby="system-overview-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">01 / SYSTEM OVERVIEW</p>
+          <h2 id="system-overview-title"><span class="section-number">MAP</span>一张系统地图</h2>
+        </div>
+        <p>点击节点查看统一字段：功能、输入、输出、上下游、证据和范围边界。连线只表达四种语义：数据、几何/坐标、控制/门控、证据。</p>
+      </div>
+      <div class="system-map-layout">
+        <div class="map-card">
+          <svg id="system-map" viewBox="0 0 940 430" role="group" aria-labelledby="system-map-title system-map-desc">
+            <title id="system-map-title">系统总览：六章之间的数据、几何、控制与证据关系</title>
+            <desc id="system-map-desc">从体表测量开始，经统一坐标、参考配准、可信度判断和反馈门控，最终进入证据边界。节点可点击查看统一字段。</desc>
+          </svg>
+          <div class="map-legend" aria-label="连线语义图例">
+            <span><i class="line-key"></i>数据</span>
+            <span><i class="line-key geometry"></i>几何 / 坐标</span>
+            <span><i class="line-key control"></i>控制 / 门控</span>
+            <span><i class="line-key evidence"></i>证据 / 推断</span>
+          </div>
+        </div>
+        <aside class="map-detail" id="map-detail" aria-live="polite" aria-atomic="true">
+          <p class="map-detail-kicker" id="map-detail-kicker">NODE / 01</p>
+          <h3 id="map-detail-title">01 · 体表测量</h3>
+          <p id="map-detail-function">把可见体表转换为带纹理的左右图像，再形成三维点或表面。</p>
+          <dl class="detail-grid">
+            <div><dt>输入</dt><dd id="map-detail-inputs">相机图像 · 投影纹理 · 相机几何</dd></div>
+            <div><dt>输出</dt><dd id="map-detail-outputs">三维点云 / 表面</dd></div>
+            <div><dt>上游</dt><dd id="map-detail-upstream">体表可见性</dd></div>
+            <div><dt>下游</dt><dd id="map-detail-downstream">坐标统一 · 覆盖判断</dd></div>
+            <div><dt>证据</dt><dd id="map-detail-evidence">P6 · V1</dd></div>
+          </dl>
+          <p class="detail-boundary" id="map-detail-boundary">有点云不等于整张表面没有遮挡或错配。</p>
+          <p style="margin-top:14px"><a id="map-detail-link" href="surface/index.html">进入本章完整阅读 →</a></p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section-block" id="chapters" aria-labelledby="chapters-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">02 / SIX CHAPTERS</p>
+          <h2 id="chapters-title"><span class="section-number">READ</span>六章阅读主线</h2>
+        </div>
+        <p>每章固定节奏：本章问题 → 主图 → 一个主交互 → 工程结论 → 证据与边界。延伸实验默认折叠，避免一次打开所有控件。</p>
+      </div>
+      <div class="chapter-grid">
+        <a class="chapter-card" href="surface/index.html" data-chapter-id="surface">
+          <span class="chapter-card-number">01</span>
+          <h3>从体表到三维测量</h3>
+          <p>投影、匹配与三角测量：有纹理不等于匹配正确，有视差不等于三维可信。</p>
+          <span class="chapter-card-foot"><span>3 EXPERIMENTS</span><span>进入 →</span></span>
+        </a>
+        <a class="chapter-card" href="coordinates/index.html" data-chapter-id="coordinates">
+          <span class="chapter-card-number">02</span>
+          <h3>从多视角到统一坐标</h3>
+          <p>相机内参、POD 变换与治疗室基准：相机彼此一致，不等于与辐射等中心一致。</p>
+          <span class="chapter-card-foot"><span>2 EXPERIMENTS</span><span>进入 →</span></span>
+        </a>
+        <a class="chapter-card" href="pose/index.html" data-chapter-id="pose">
+          <span class="chapter-card-number">03</span>
+          <h3>从参考到六自由度位姿</h3>
+          <p>参考、ROI、刚体变换和旋转中心：零偏差只对当前参考成立。</p>
+          <span class="chapter-card-foot"><span>3 EXPERIMENTS</span><span>进入 →</span></span>
+        </a>
+        <a class="chapter-card" href="validity/index.html" data-chapter-id="validity">
+          <span class="chapter-card-number">04</span>
+          <h3>从配准到跟踪可信</h3>
+          <p>残差、覆盖、约束和新鲜度：低残差不是完整有效性证明，无数据不能当作零运动。</p>
+          <span class="chapter-card-foot"><span>4 EXPERIMENTS</span><span>进入 →</span></span>
+        </a>
+        <a class="chapter-card" href="feedback/index.html" data-chapter-id="feedback">
+          <span class="chapter-card-number">05</span>
+          <h3>从测量到反馈与门控</h3>
+          <p>呼吸反馈、判定、接口与停束：反馈颜色、运动许可和束流停止不是同一个事件。</p>
+          <span class="chapter-card-foot"><span>2 EXPERIMENTS</span><span>进入 →</span></span>
+        </a>
+        <a class="chapter-card" href="evidence/index.html" data-chapter-id="evidence">
+          <span class="chapter-card-number">06</span>
+          <h3>从服务应用到证据边界</h3>
+          <p>体表测量不等于体内靶区位置；服务能力需要独立场景、真值和接口验证。</p>
+          <span class="chapter-card-foot"><span>1 EXPERIMENT + EVIDENCE</span><span>进入 →</span></span>
+        </a>
+      </div>
+    </section>
+
+    <section class="section-block" id="experiment-index" aria-labelledby="experiment-index-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">03 / EXPERIMENT INDEX</p>
+          <h2 id="experiment-index-title"><span class="section-number">LAB</span>15 个实验索引</h2>
+        </div>
+        <p>旧编号保留为迁移线索，但不再作为唯一导航。每个实验都明确它能回答什么、不能回答什么，以及是否只是教学示例。</p>
+      </div>
+      <div class="experiment-tools" role="group" aria-label="按章节筛选实验">
+        <button class="filter-button" type="button" data-filter="all" aria-pressed="true">全部 15</button>
+        <button class="filter-button" type="button" data-filter="surface" aria-pressed="false">01 体表测量</button>
+        <button class="filter-button" type="button" data-filter="coordinates" aria-pressed="false">02 统一坐标</button>
+        <button class="filter-button" type="button" data-filter="pose" aria-pressed="false">03 参考与位姿</button>
+        <button class="filter-button" type="button" data-filter="validity" aria-pressed="false">04 可信度</button>
+        <button class="filter-button" type="button" data-filter="feedback" aria-pressed="false">05 反馈与门控</button>
+        <button class="filter-button" type="button" data-filter="evidence" aria-pressed="false">06 证据边界</button>
+      </div>
+      <div class="experiment-grid">
+        <div class="experiment-card" id="exp-hardware" data-experiment-id="exp-hardware" data-chapter="surface">
+          <div class="experiment-card-top"><b>旧 01 · system</b><span>01 体表测量</span></div>
+          <h3>光学采集：一组相机怎样看见体表？</h3>
+          <p>可见表面、相机视线和投影纹理的基本关系。</p>
+          <a href="surface/index.html#experiment-hardware">进入实验 →</a>
+        </div>
+        <div class="experiment-card" id="exp-matching" data-experiment-id="exp-matching" data-chapter="surface">
+          <div class="experiment-card-top"><b>旧 02 · matching</b><span>01 体表测量</span></div>
+          <h3>双目匹配：有纹理，为什么仍可能配错？</h3>
+          <p>无纹理、重复纹理与随机纹理对对应关系的影响。</p>
+          <a href="surface/index.html#experiment-matching">进入实验 →</a>
+        </div>
+        <div class="experiment-card" id="exp-stereo" data-experiment-id="exp-stereo" data-chapter="surface">
+          <div class="experiment-card-top"><b>旧 03 · stereo</b><span>01 体表测量</span></div>
+          <h3>主动双目：从对应像素到三维点</h3>
+          <p>视差、基线、焦距与深度之间的几何关系。</p>
+          <a href="surface/index.html#experiment-stereo">进入实验 →</a>
+        </div>
+        <div class="experiment-card" id="exp-calibration" data-experiment-id="exp-calibration" data-chapter="coordinates">
+          <div class="experiment-card-top"><b>旧 04 · calibration</b><span>02 统一坐标</span></div>
+          <h3>标定：像素误差怎样进入空间误差？</h3>
+          <p>内参、重投影误差和坐标基准之间的关系。</p>
+          <a href="coordinates/index.html#experiment-calibration">进入实验 →</a>
+        </div>
+        <div class="experiment-card" id="exp-fusion" data-experiment-id="exp-fusion" data-chapter="coordinates">
+          <div class="experiment-card-top"><b>旧 05 · fusion</b><span>02 统一坐标</span></div>
+          <h3>多视角融合：更多观测补回了哪片表面？</h3>
+          <p>多视角对覆盖和遮挡的补充作用。</p>
+          <a href="coordinates/index.html#experiment-fusion">进入实验 →</a>
+        </div>
+        <div class="experiment-card" id="exp-reference" data-experiment-id="exp-reference" data-chapter="pose">
+          <div class="experiment-card-top"><b>旧 09 · reference</b><span>03 参考与位姿</span></div>
+          <h3>参考管理：偏差为零时，谁定义了零？</h3>
+          <p>参考来源、确认状态与更新记录的重要性。</p>
+          <a href="pose/index.html#experiment-reference">进入实验 →</a>
+        </div>
+        <div class="experiment-card" id="exp-roi" data-experiment-id="exp-roi" data-chapter="pose">
+          <div class="experiment-card-top"><b>旧 08 · ROI</b><span>03 参考与位姿</span></div>
+          <h3>ROI：看见表面，为什么仍可能判断不唯一？</h3>
+          <p>区域大小、形状特征和局部遮挡对约束的影响。</p>
+          <a href="pose/index.html#experiment-roi">进入实验 →</a>
+        </div>
+        <div class="experiment-card" id="exp-pose" data-experiment-id="exp-pose" data-chapter="pose">
+          <div class="experiment-card-top"><b>旧 10 · 6DoF</b><span>03 参考与位姿</span></div>
+          <h3>6DoF：平移和旋转怎样共同作用？</h3>
+          <p>参考坐标系、旋转顺序和旋转中心对读数的影响。</p>
+          <a href="pose/index.html#experiment-pose">进入实验 →</a>
+        </div>
+        <div class="experiment-card" id="exp-registration" data-experiment-id="exp-registration" data-chapter="validity">
+          <div class="experiment-card-top"><b>旧 06 · QA</b><span>04 可信度</span></div>
+          <h3>绝对精度与配准：位置偏了，还是位移量错了？</h3>
+          <p>零点偏移与比例误差分别怎样影响读数。</p>
+          <a href="validity/index.html#experiment-registration">进入实验 →</a>
+        </div>
+        <div class="experiment-card" id="exp-solver" data-experiment-id="exp-solver" data-chapter="validity">
+          <div class="experiment-card-top"><b>旧 12 · solver</b><span>04 可信度</span></div>
+          <h3>配准求解：残差变小，为什么不一定更接近真值？</h3>
+          <p>最近邻、初值、局部极小与拟合残差的关系。</p>
+          <a href="validity/index.html#experiment-solver">进入实验 →</a>
+        </div>
+        <div class="experiment-card" id="exp-residual" data-experiment-id="exp-residual" data-chapter="validity">
+          <div class="experiment-card-top"><b>旧 13 · residual</b><span>04 可信度</span></div>
+          <h3>形变残差：去掉刚体位姿后，还剩下什么？</h3>
+          <p>局部形变、ROI 选择和残差可视化之间的区别。</p>
+          <a href="validity/index.html#experiment-residual">进入实验 →</a>
+        </div>
+        <div class="experiment-card" id="exp-validity" data-experiment-id="exp-validity" data-chapter="validity">
+          <div class="experiment-card-top"><b>旧 14 · validity</b><span>04 可信度</span></div>
+          <h3>跟踪有效性：无数据为什么不能当作零运动？</h3>
+          <p>覆盖、约束、遮挡和新鲜度怎样合成可用状态。</p>
+          <a href="validity/index.html#experiment-validity">进入实验 →</a>
+        </div>
+        <div class="experiment-card" id="exp-coach" data-experiment-id="exp-coach" data-chapter="feedback">
+          <div class="experiment-card-top"><b>旧 07 · coach</b><span>05 反馈与门控</span></div>
+          <h3>呼吸反馈：患者看到的颜色代表什么？</h3>
+          <p>目标带、当前高度和反馈状态之间的显示关系。</p>
+          <a href="feedback/index.html#experiment-coach">进入实验 →</a>
+        </div>
+        <div class="experiment-card" id="exp-latency" data-experiment-id="exp-latency" data-chapter="feedback">
+          <div class="experiment-card-top"><b>旧 11 · latency</b><span>05 反馈与门控</span></div>
+          <h3>门控时延：已经越界，为什么束流还没有停？</h3>
+          <p>采样、处理、接口和停束响应在完整链路中的位置。</p>
+          <a href="feedback/index.html#experiment-latency">进入实验 →</a>
+        </div>
+        <div class="experiment-card" id="exp-surface-internal" data-experiment-id="exp-surface-internal" data-chapter="evidence">
+          <div class="experiment-card-top"><b>旧 15 · internal</b><span>06 证据边界</span></div>
+          <h3>体表与内部：相同外形能唯一确定内部位置吗？</h3>
+          <p>表面观测与内部状态之间为什么需要独立关联。</p>
+          <a href="evidence/index.html#experiment-surface-internal">进入实验 →</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="scope-banner" aria-label="R0 范围提示">
+      <strong>R0 工程边界</strong>
+      <p>本报告是技术学习与应用研究材料：单组双目、独立模体台架、本地工作站和模拟接口。不连接真实出束控制，不驱动治疗床，不接入真实患者，也不把公开产品资料或教学参数写成临床规格。</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-row">
+      <span><strong>SGRT 技术原理与应用 · technical-v2</strong> · 采用结构化系统总览与六章页面</span>
+      <div class="footer-links">
+        <a href="../technical/index.html">旧版完整技术页</a>
+        <a href="../index.html">综合入门</a>
+        <a href="#main">回到顶部 ↑</a>
+      </div>
+    </div>
+    <p class="footer-fine">原生 HTML / CSS / JavaScript · 可离线阅读 · 合成实验仅用于说明 · Fact / Inference / Assumption 分层 · 页面不构成医疗建议或注册证据。</p>
+  </footer>
+
+  <script src="assets/report-data.js"></script>
+  <script src="assets/report.js" defer></script>
+</body>
+</html>

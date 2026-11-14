@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f3f7fb">
+  <meta name="description" content="SGRT 技术报告第一章：从体表到三维测量，理解投影、双目匹配、视差和三角测量。">
+  <title>01 从体表到三维测量 · SGRT 技术报告 v2</title>
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/report.css">
+</head>
+<body class="report-shell" data-page="surface">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <a class="brand" href="../../index.html" aria-label="返回 SGRT 知识系列首页">
+      <span class="brand-mark" aria-hidden="true">S</span>
+      <span>光学体表引导<span class="brand-caption">SGRT KNOWLEDGE SERIES / TECHNICAL V2</span></span>
+    </a>
+    <nav class="header-nav" aria-label="专题切换">
+      <a href="../../index.html">01 综合入门</a>
+      <a href="../index.html">02 技术总览</a>
+      <a href="../../technical/index.html">旧版技术页</a>
+    </nav>
+    <div class="header-meta"><span class="preview-pill">CHAPTER 01 / 06</span><span>V2 PREVIEW</span></div>
+  </header>
+
+  <main id="main" class="site-main">
+    <div class="breadcrumb"><a href="../index.html">技术总览</a><span>/</span><span>01 从体表到三维测量</span></div>
+    <nav class="chapter-rail" aria-label="六章导航">
+      <a href="../index.html">总览</a>
+      <a href="index.html" aria-current="page">01 体表测量</a>
+      <a href="../coordinates/index.html">02 统一坐标</a>
+      <a href="../pose/index.html">03 参考与位姿</a>
+      <a href="../validity/index.html">04 可信度</a>
+      <a href="../feedback/index.html">05 反馈与门控</a>
+      <a href="../evidence/index.html">06 证据边界</a>
+    </nav>
+
+    <section class="chapter-hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">01 / SURFACE → 3D</p>
+        <h1 id="page-title"><span class="chapter-number">01</span>从体表到<br>三维测量</h1>
+        <p class="chapter-question">一帧图像怎样变成可解释的三维表面？先分清纹理、对应、三角测量和“这张表面是否可信”是四个不同问题。</p>
+      </div>
+      <aside class="chapter-conclusion"><strong>本章工程结论</strong>有纹理、有对应、有标定，才有一个可用的三维点；某个点被重建，不等于整张体表都可信。</aside>
+    </section>
+
+    <div class="chapter-content">
+      <section class="chapter-intro" aria-labelledby="intro-title">
+        <div>
+          <h2 id="intro-title">一条从光子到坐标的链路</h2>
+          <p>主动双目系统先用投影器补充可辨识纹理，再由两台固定相机在同一时刻观察同一片体表。两幅图像中的同一表面点在横坐标上产生视差，结合已标定的焦距和基线，才能恢复深度。</p>
+          <p>这条链路里，任何一个环节都不能用“后面还有算法”替代：没有纹理会产生匹配歧义，匹配错了会得到错误的视差，标定不准会把像素误差放大成空间误差。</p>
+          <div class="inline-tags"><span class="tag tag--fact">Fact · 公开机制</span><span class="tag tag--inference">Inference · 误差传播</span><span class="tag tag--assumption">Assumption · 教学参数</span></div>
+        </div>
+        <p class="intro-note"><b>阅读提示</b>本章的 f = 720 px、B = 80 mm 等数值只用于演示几何关系，不代表任何设备配置。实验中的“通过”只说明本例满足教学条件。</p>
+      </section>
+
+      <figure class="main-figure">
+        <div class="figure-head"><span>MAIN FIGURE 01</span><span>PROJECTION → MATCHING → TRIANGULATION</span></div>
+        <svg viewBox="0 0 940 270" role="img" aria-labelledby="surface-figure-title surface-figure-desc">
+          <title id="surface-figure-title">从投影到三维点的链路</title>
+          <desc id="surface-figure-desc">投影器给体表增加纹理，左右相机形成图像，匹配算法寻找对应像素，三角测量把视差转换为深度。</desc>
+          <defs>
+            <marker id="surface-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#125bc5"/></marker>
+          </defs>
+          <rect x="16" y="20" width="188" height="222" rx="12" fill="#e8f2fa" stroke="#d3e2ef"/>
+          <text x="42" y="52" fill="#076b83" font-size="11" font-family="Consolas, monospace">01 / PROJECT</text>
+          <rect x="56" y="90" width="110" height="62" rx="9" fill="#fff" stroke="#aec9de"/>
+          <path d="M78 120h65M78 130h48M78 140h56" stroke="#a94f12" stroke-width="4"/>
+          <text x="110" y="178" text-anchor="middle" fill="#102e50" font-size="12">投影纹理</text>
+          <path d="M164 120H232" stroke="#125bc5" stroke-width="2" marker-end="url(#surface-arrow)"/>
+          <rect x="252" y="20" width="250" height="222" rx="12" fill="#fff" stroke="#d3e2ef"/>
+          <text x="278" y="52" fill="#076b83" font-size="11" font-family="Consolas, monospace">02 / MATCH</text>
+          <rect x="276" y="82" width="90" height="74" rx="5" fill="#1b2a35" stroke="#86d6f5"/>
+          <rect x="390" y="82" width="90" height="74" rx="5" fill="#1b2a35" stroke="#ffb271"/>
+          <g fill="#c8eaf3"><circle cx="302" cy="102" r="2"/><circle cx="329" cy="119" r="2"/><circle cx="346" cy="98" r="2"/><circle cx="293" cy="139" r="2"/><circle cx="334" cy="143" r="2"/><circle cx="355" cy="127" r="2"/></g>
+          <g fill="#f7d3b2"><circle cx="416" cy="102" r="2"/><circle cx="443" cy="119" r="2"/><circle cx="460" cy="98" r="2"/><circle cx="407" cy="139" r="2"/><circle cx="448" cy="143" r="2"/><circle cx="469" cy="127" r="2"/></g>
+          <text x="321" y="180" fill="#86d6f5" font-size="10">左相机图像</text>
+          <text x="435" y="180" fill="#ffb271" font-size="10">右相机图像</text>
+          <path d="M468 120H535" stroke="#125bc5" stroke-width="2" marker-end="url(#surface-arrow)"/>
+          <rect x="555" y="20" width="230" height="222" rx="12" fill="#e8f2fa" stroke="#d3e2ef"/>
+          <text x="581" y="52" fill="#076b83" font-size="11" font-family="Consolas, monospace">03 / TRIANGULATE</text>
+          <path d="M640 92L590 168M640 92L690 168M590 168H690" fill="none" stroke="#125bc5" stroke-width="2"/>
+          <circle cx="640" cy="92" r="6" fill="#a94f12"/>
+          <circle cx="590" cy="168" r="5" fill="#076b83"/><circle cx="690" cy="168" r="5" fill="#076b83"/>
+          <text x="640" y="205" text-anchor="middle" fill="#102e50" font-size="12">深度 Z = fB / d</text>
+          <text x="640" y="224" text-anchor="middle" fill="#536b83" font-size="10">视差 d 越小，深度越大</text>
+          <path d="M790 120H816" stroke="#125bc5" stroke-width="2" marker-end="url(#surface-arrow)"/>
+          <text x="830" y="108" fill="#536b83" font-size="11">一个</text>
+          <text x="830" y="126" fill="#536b83" font-size="11">三维点</text>
+          <text x="830" y="144" fill="#536b83" font-size="11">不是整张</text>
+          <text x="830" y="162" fill="#536b83" font-size="11">表面</text>
+        </svg>
+        <figcaption>主图只表达链路，不代表厂商实际算法。投影、匹配和三角测量各自有失败条件；后续章节会把“覆盖、形变、新鲜度”加入可信度判断。</figcaption>
+      </figure>
+
+      <details class="experiment-details" id="experiment-hardware">
+        <summary><span>实验 1.1 · 旧 01</span> 光学采集：一组相机怎样看见体表？ <span>system</span></summary>
+        <div class="details-body">
+          <p>典型主动双目单元由两台相机和中央投影器组成：投影器增加纹理，相机从不同方向观察。可见性不是“有相机就有数据”，机架、治疗床、固定装置和患者体位都可能挡住某一片表面。</p>
+          <div class="inline-tags"><span class="tag tag--fact">V1 公开技术页</span><span class="tag tag--fact">V3 特定版本描述</span><span class="tag tag--inference">Inference · 遮挡与覆盖</span></div>
+          <p><b>范围：</b>本页只解释主动双目的概念布局，不是安装图，也不能从图中推出相机数量、基线或视野。</p>
+        </div>
+      </details>
+
+      <section class="lab" id="experiment-matching" aria-labelledby="matching-title">
+        <div class="lab-head">
+          <div><p class="lab-kicker">MAIN EXPERIMENT / 1.2</p><h3 id="matching-title">双目匹配：有纹理，为什么仍可能配错？</h3><p>先比较无纹理、重复纹理和随机散斑，再沿候选视差搜索对应。</p></div>
+          <span class="lab-tag">教学示例 · 非厂商算法</span>
+        </div>
+        <div class="lab-body">
+          <div class="lab-stage">
+            <div class="lab-grid-2">
+              <div><p class="control-title" style="margin-bottom:7px"><span>左相机 · 固定纹理块</span><output>uL = 220 px</output></p><canvas id="matching-left" width="390" height="190" role="img" aria-label="左相机合成纹理图，橙框标出固定纹理块"></canvas></div>
+              <div><p class="control-title" style="margin-bottom:7px"><span>右相机 · 候选窗口</span><output>48 px</output></p><canvas id="matching-right" width="390" height="190" role="img" aria-label="右相机合成纹理图，蓝框随候选视差移动"></canvas></div>
+            </div>
+            <div class="lab-legend"><span class="orange"><i></i>固定窗口</span><span class="blue"><i></i>候选窗口</span><span>两幅图已做极线校正的简化示意</span></div>
+          </div>
+          <div class="lab-controls">
+            <div class="control-row">
+              <p class="control-title"><span>纹理模式</span><span>选择实验条件</span></p>
+              <div class="lab-grid-2" style="margin-top:8px" role="group" aria-label="选择纹理模式">
+                <button class="lab-button" type="button" data-texture="blank" aria-pressed="false">无纹理</button>
+                <button class="lab-button" type="button" data-texture="repeat" aria-pressed="false">重复纹理</button>
+                <button class="lab-button" type="button" data-texture="random" aria-pressed="true">随机散斑</button>
+              </div>
+            </div>
+            <div class="control-row">
+              <div class="control-title"><label for="matching-disparity">候选视差 d</label><output id="matching-disparity-label">48 px</output></div>
+              <input id="matching-disparity" type="range" min="24" max="72" step="1" value="48">
+              <div class="range-scale"><span>24 px</span><span>48 px</span><span>72 px</span></div>
+            </div>
+            <div class="lab-readout"><b>教 学 读 数</b><strong id="matching-score">0.96</strong><span id="matching-depth">1.20 m · 合成深度</span></div>
+            <div class="state-box" id="matching-verdict" role="status" aria-live="polite">唯一性通过（教学示例）：随机纹理在正确视差附近出现主峰。</div>
+            <p class="control-note" id="matching-readout" role="status" aria-live="polite">对应 48 px → 理想深度 1.20 m。只有通过唯一性检查才可继续三角测量。</p>
+            <button class="lab-button lab-button--quiet" id="matching-scan" type="button">下一候选 →</button>
+          </div>
+        </div>
+      </section>
+
+      <details class="experiment-details" id="experiment-stereo">
+        <summary><span>实验 1.3 · 旧 03</span> 主动双目：从对应像素到三维点 <span>stereo</span></summary>
+        <div class="details-body">
+          <p>三角测量把“同一点在左右图中的横坐标差”转换为深度。改变距离或基线，观察视差怎样变化；这里使用已校正、同焦距、主点对齐的理想模型。</p>
+          <div class="lab-grid-2" style="margin-top:14px">
+            <div><div class="control-title"><label for="stereo-z">体表轴向距离 Z</label><output id="stereo-depth">1.20 m</output></div><input id="stereo-z" type="range" min="600" max="2400" step="10" value="1200"><div class="range-scale"><span>0.60 m</span><span>2.40 m</span></div></div>
+            <div><div class="control-title"><label for="stereo-baseline">相机基线 B</label><output>80 mm</output></div><input id="stereo-baseline" type="range" min="40" max="160" step="1" value="80"><div class="range-scale"><span>40 mm</span><span>160 mm</span></div></div>
+          </div>
+          <div class="lab-readout" style="background:#10283b;color:#edf6fc"><b>视差 / 误差</b><strong id="stereo-disparity" style="color:#86d6f5">48.0 px</strong><span id="stereo-error">≈ 0.33 mm · 仅传播 0.1 px 视差误差</span></div>
+          <p id="stereo-state" role="status" aria-live="polite">视差 48.0 px；这是已校正理想模型的几何换算，不是设备精度。</p>
+          <p class="control-note">公式：Z = fB/d；|ΔZ| ≈ Z²/(fB)·|Δd|。真实误差还受标定、匹配、遮挡、同步和表面反射影响。</p>
+        </div>
+      </details>
+
+      <section class="chapter-takeaways" aria-label="本章结论">
+        <div class="takeaway-card fact"><h3>Fact · 公开机制</h3><p>主动双目使用投影纹理、双视角图像和三角测量。厂商公开资料能支持这条技术路线，但不公开完整匹配器。</p></div>
+        <div class="takeaway-card inference"><h3>Inference · 工程判断</h3><p>匹配唯一性、标定几何和遮挡会共同影响三维点；单个高分不能证明整张表面有效。</p></div>
+        <div class="takeaway-card assumption"><h3>Assumption · 教学条件</h3><p>本页 f、B、窗口和阈值均为固定教学参数；用于理解关系，不用于设备选型或临床比较。</p></div>
+      </section>
+
+      <section class="chapter-boundary" aria-labelledby="boundary-title">
+        <div><h2 id="boundary-title">本章能回答什么？</h2><p>能解释一个三维点是怎样从纹理、对应和视差得到的；能说明为什么无纹理、重复纹理和错配会让深度失效。不能据此声称任何具体设备的精度、速度或临床适用性。</p><div class="inline-tags"><span class="tag tag--fact">P6</span><span class="tag tag--fact">V1</span><span class="tag tag--fact">D1</span></div></div>
+        <div class="boundary-list"><div><b>不能回答</b><span>体表点云是否覆盖目标区域</span></div><div><b>不能回答</b><span>匹配结果是否唯一</span></div><div><b>需要下一章</b><span>标定与统一坐标</span></div></div>
+      </section>
+    </div>
+
+    <nav class="page-nav-bottom" aria-label="章节翻页">
+      <a href="../index.html" rel="prev"><small>上一站</small><strong>← 技术总览</strong></a>
+      <a class="home-link" href="../index.html">回系统地图</a>
+      <a href="../coordinates/index.html" rel="next"><small>下一章 / 02</small><strong>从多视角到统一坐标 →</strong></a>
+    </nav>
+  </main>
+
+  <footer class="site-footer"><div class="footer-row"><span>SGRT 技术报告 v2 · 01 从体表到三维测量</span><div class="footer-links"><a href="../index.html">系统总览</a><a href="../../technical/index.html">旧版技术页</a><a href="#main">回到顶部 ↑</a></div></div><p class="footer-fine">教学示例 · 合成图像 · 不代表设备配置、临床阈值或 R0 以外能力。</p></footer>
+  <script src="../assets/report-data.js"></script>
+  <script src="../assets/report.js" defer></script>
+</body>
+</html>
