@@ -129,9 +129,13 @@ def main():
     assert (REPORT / 'assets' / 'structure-atlas.html').stat().st_size > 0
     pdf = REPORT / 'AlignRT与SGRT专题报告_A4.pdf'
     assert pdf.read_bytes().startswith(b'%PDF-'), 'Invalid PDF header'
+    algorithm = check_page(REPORT / 'algorithms' / 'index.html')
+    for number in range(1, 13):
+        assert f'M{number:02d}' in algorithm.ids, f'Missing algorithm module {number}'
+    assert 'algorithms/index.html' in page.links, 'Missing algorithm report entry'
     v2 = check_v2(REPORT)
     version = (ROOT / 'VERSION').read_text(encoding='utf-8').strip()
-    print(f'PASS v{version}: two reports, {len(technical.ids)} technical anchors, '
+    print(f'PASS v{version}: report hub and algorithm modules, {len(technical.ids)} technical anchors, '
           f'{v2["experiments"]} v2 experiments, local assets, 29 source pages, SVG and PDF integrity')
 
 if __name__ == '__main__':
